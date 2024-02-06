@@ -1,0 +1,40 @@
+.char-comp {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.char-comp .indexs {
+  width: 100%;
+  height: 50px;
+}
+
+.indexs {
+  display: flex;
+  width: 100%;
+  text-align: start;
+}
+
+.indexs div
+
+.indexs .btn-container {
+  width: 200px
+}
+.char-comp button {
+  width: 80px;
+  height: 30px;
+  border: 1px solid black;
+  border-radius: 15px;
+  background-color: blanchedalmond;
+  font-weight: 600;
+  margin: auto 2px;
+  transition: .2s;
+}
+.char-comp button:hover {
+  border: 1px solid blanchedalmond;
+  background-color: rgb(238, 162, 48);
+  color: white;
+}

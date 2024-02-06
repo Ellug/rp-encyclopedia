@@ -1,0 +1,13 @@
+.main {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.main h1 {
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 100px;
+}

@@ -1,24 +1,29 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import { Route, HashRouter, Routes } from 'react-router-dom';
+import Main from './pages/main';
+import History from './pages/History';
+import Character from './pages/Character';
+import Etc from './pages/ETC';
+import Map from './pages/Map';
+import Game from './pages/Game';
+import NavBar from './components/NavBar';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <HashRouter basename=''>
+        <NavBar />
+        <div className='routes-container'>
+          <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/character" element={<Character />} />
+            <Route path="/etc" element={<Etc />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/game" element={<Game />} />
+          </Routes>
+        </div>
+    </HashRouter>
   );
 }
 
