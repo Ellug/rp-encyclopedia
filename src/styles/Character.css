@@ -7,6 +7,19 @@
   position: relative;
 }
 
+.add-inputs {
+  display: block;
+}
+
+.add-inputs .add-profile {
+  display: flex;
+}
+
+.add-detail {
+  width: 55%;
+  height: 50px;
+}
+
 .char-comp .indexs {
   width: 100%;
   height: 50px;
@@ -16,12 +29,45 @@
   display: flex;
   width: 100%;
   text-align: start;
+  align-items: center;
+}
+.indexs .infos {
+  display: flex;
+  flex-grow: 1;
+}
+.indexs .infos .profile {
+  display: flex;
+}
+.indexs .info {
+  margin: auto 5px;
+}
+.indexs .infos .profile {
+  width: 100%;
+}
+.indexs .info.birth {
+  width: 30px;
+}
+.indexs .info.name {
+  width: 140px;
+}.indexs .info.fam {
+  width: 170px;
+}.indexs .info.gen {
+  width: 30px;
+}.indexs .info.unit {
+  width: 110px;
+}
+.indexs .info.party {
+  width: 160px;
 }
 
-.indexs div
+.indexs .profile .detail {
+  width: 650px;
+}
 
 .indexs .btn-container {
-  width: 200px
+  width: 200px;
+  position: absolute;
+  right: 0;
 }
 .char-comp button {
   width: 80px;
