@@ -14,7 +14,7 @@
 
 .modal-content {
   background-color: rgb(7, 6, 12);
-  padding: 20px;
+  padding: 50px;
   border: 1px solid #888;
   width: 60%;
   height: 60%;
@@ -35,4 +35,43 @@
 .detail-profile {
   text-align: start;
   line-height: 1.8;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+}
+.info-title {
+  font-size: 26px;
+  line-height: .5;
+}
+.info-name {
+  font-size: 44px;
+  line-height: 1.7;
+}
+
+.info-detail {
+  padding: 20px;
+  line-height: 1.9;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: start;
+}
+
+.edit-input .input-wrapper {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  justify-content: space-between;
+}
+.edit-input .input-wrapper input{
+  display: flex;
+  width: 90%;
+  height: 20px;
+  margin: 0 10px;
+}
+.edit-input textarea {
+  width: 100%;
+  height: 100px;
+}
+.edit-input textarea:focus {
+  width: 100%;
+  height: 500px;
 }

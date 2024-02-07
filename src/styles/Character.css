@@ -18,8 +18,11 @@
 }
 
 .add-detail {
-  width: 55%;
-  height: 50px;
+  width: 90%;
+  min-height: 100px;
+}
+.add-detail:focus {
+  min-height: 500px;
 }
 
 .char-comp .indexs {
@@ -54,6 +57,14 @@
 }
 .indexs .info.name {
   width: 110px;
+}
+.indexs .info.name:hover,
+.indexs .info.fam:hover,
+.indexs .info.party:hover {
+  color: yellow;
+  cursor: pointer;
+  transform: scale(1.05);
+  transition: .2s;
 }
 .indexs .info.fam {
   width: 130px;
@@ -96,12 +107,6 @@
   width: 130px;
 }
 
-.indexs .btn-container {
-  width: 90px;
-  position: absolute;
-  right: 0;
-  transform: translateY(-12px);
-}
 .char-comp button {
   width: 80px;
   height: 40px;

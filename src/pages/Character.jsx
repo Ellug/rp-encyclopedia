@@ -9,12 +9,15 @@ const Character = () => {
   const [characters, setCharacters] = useState([]);
   const [newCharacter, setNewCharacter] = useState({
     birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-    weapon: '', hobby: '', talent: '', body: '', country: '',
+    weapon: '', hobby: '', talent: '', body: '', country: '', familyRelation: '', goodship: '', badship: ''
   });
   const [editCharacter, setEditCharacter] = useState({});
   const db = getFirestore(app);
   const [showModal, setShowModal] = useState(false);
   const [currentYear, setCurrentYear] = useState('52');
+
+  const [selectedFamily, setSelectedFamily] = useState('');
+  const [selectedParty, setSelectedParty] = useState('');
 
   // 모달 열기
   const openModal = (character) => {
@@ -30,12 +33,37 @@ const Character = () => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "char"), (snapshot) => {
-      const characterList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        .sort((a, b) => a.birth - b.birth); // birth 필드를 기준으로 오름차순 정렬
+      let characterList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (selectedFamily || selectedParty) {
+        characterList = characterList.sort((a, b) => {
+          if (selectedFamily && (a.family === selectedFamily && b.family !== selectedFamily)) {
+            return -1;
+          }
+          if (selectedFamily && (a.family !== selectedFamily && b.family === selectedFamily)) {
+            return 1;
+          }
+          if (selectedParty && (a.party === selectedParty && b.party !== selectedParty)) {
+            return -1;
+          }
+          if (selectedParty && (a.party !== selectedParty && b.party === selectedParty)) {
+            return 1;
+          }
+          return a.birth - b.birth; // Default sorting by birth
+        });
+      } else {
+        characterList = characterList.sort((a, b) => a.birth - b.birth); // Default sorting by birth
+      }
       setCharacters(characterList);
     });
     return () => unsubscribe();
-  }, [db]);
+  }, [db, selectedFamily, selectedParty]);
+
+  const handleFamilyClick = (familyName) => {
+    setSelectedFamily(familyName);
+  };
+  const handlePartyClick = (partyName) => {
+    setSelectedParty(partyName);
+  };
 
 
   const handleNewCharacterChange = (e) => {
@@ -49,7 +77,7 @@ const Character = () => {
       await setDoc(doc(db, "char", docId), newCharacter);
       setNewCharacter({ 
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-        weapon: '', hobby: '', talent: '', body: '', country:'', });
+        weapon: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '' });
     } catch (error) {
       console.error("Error adding document: ", error);
     }
@@ -78,7 +106,7 @@ const Character = () => {
     <div className='char-comp'>
       {/* 연도 입력 필드 */}
       <div>
-        <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
+        현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
       </div>
 
       <div style={{ height: '700px', width: '1800px', overflowY: 'scroll', margin: '10px auto', padding: '10px', border: '1px solid white', position: 'relative' }}>
@@ -88,10 +116,10 @@ const Character = () => {
                 <div className='profile'>
                   <div className='info birth'>
                     {character.birth}</div>
-                    <div className='info name'>
+                    <div className='info name' onClick={() => openModal(character)}>
                       {character.name?.substring(0, 6)}{character.name?.length > 6 ? '...' : ''}
                     </div>
-                    <div className='info fam'>
+                    <div className='info fam' onClick={() => handleFamilyClick(character.family)}>
                       {character.family?.substring(0, 7)}{character.family?.length > 7 ? '...' : ''}
                     </div>
                     <div className='info title'>
@@ -104,7 +132,7 @@ const Character = () => {
                   <div className='info unit'>
                     {character.unit?.substring(0, 5)}{character.unit?.length > 5 ? '...' : ''}
                     </div>
-                  <div className='info party'>
+                  <div className='info party' onClick={() => handlePartyClick(character.party)}>
                     {character.party?.substring(0, 10)}{character.party?.length > 10 ? '...' : ''}
                   </div>
                   <div className='info personality'>
@@ -124,9 +152,6 @@ const Character = () => {
                   <div className='info country'>
                     {character.country?.substring(0, 8)}{character.country?.length > 8 ? '...' : ''}
                   </div>
-                </div>
-                <div className='btn-container'>
-                  <button onClick={() => openModal(character)}>상세 정보</button>
                 </div>
               </div>
           </div>
@@ -150,7 +175,7 @@ const Character = () => {
           <input type="text" name="body" value={newCharacter.body} onChange={handleNewCharacterChange } placeholder="body" autoComplete='off' />
           <input type="text" name="country" value={newCharacter.country} onChange={handleNewCharacterChange } placeholder="country" autoComplete='off' />
         </div>
-        <input className='add-detail' type="text" name="detail" value={newCharacter.detail} onChange={handleNewCharacterChange } placeholder="Detail" />
+        <textarea className='add-detail' type="text" name="detail" value={newCharacter.detail} onChange={handleNewCharacterChange } placeholder="Detail" />
       </div>
       <button onClick={addCharacter}>추가</button>
 
