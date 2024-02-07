@@ -40,6 +40,8 @@
 }
 .indexs .infos .profile {
   display: flex;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 .indexs .info {
   margin: auto 5px;
@@ -51,13 +53,13 @@
   width: 30px;
 }
 .indexs .info.name {
-  width: 100px;
+  width: 110px;
 }
 .indexs .info.fam {
-  width: 100px;
+  width: 130px;
 }
 .indexs .info.title {
-  width: 130px;
+  width: 160px;
 }
 .indexs .info.age {
   width: 40px;
@@ -66,7 +68,7 @@
   width: 20px;
 }
 .indexs .info.unit {
-  width: 70px;
+  width: 80px;
 }
 .indexs .info.party {
   width: 180px;
@@ -98,10 +100,11 @@
   width: 90px;
   position: absolute;
   right: 0;
+  transform: translateY(-12px);
 }
 .char-comp button {
   width: 80px;
-  height: 30px;
+  height: 40px;
   border: 1px solid black;
   border-radius: 15px;
   background-color: blanchedalmond;
@@ -113,4 +116,5 @@
   border: 1px solid blanchedalmond;
   background-color: rgb(238, 162, 48);
   color: white;
+  cursor: pointer;
 }
