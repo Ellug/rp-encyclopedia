@@ -9,10 +9,12 @@
 
 .add-inputs {
   display: block;
+  width: 1400px;
+  margin: 10px auto;
 }
 
 .add-inputs .add-profile {
-  display: flex;
+  display: block;
 }
 
 .add-detail {
@@ -31,6 +33,7 @@
   text-align: start;
   align-items: center;
 }
+
 .indexs .infos {
   display: flex;
   flex-grow: 1;
@@ -48,24 +51,51 @@
   width: 30px;
 }
 .indexs .info.name {
-  width: 140px;
-}.indexs .info.fam {
-  width: 170px;
-}.indexs .info.gen {
-  width: 30px;
-}.indexs .info.unit {
-  width: 110px;
+  width: 100px;
+}
+.indexs .info.fam {
+  width: 100px;
+}
+.indexs .info.title {
+  width: 130px;
+}
+.indexs .info.age {
+  width: 40px;
+}
+.indexs .info.gen {
+  width: 20px;
+}
+.indexs .info.unit {
+  width: 70px;
 }
 .indexs .info.party {
-  width: 160px;
+  width: 180px;
+}
+.indexs .info.personality {
+  width: 50px;
+}
+.indexs .info.weapon {
+  width: 200px;
+}
+.indexs .info.hobby {
+  width: 120px;
+}
+.indexs .info.talent {
+  width: 120px;
+}
+.indexs .info.body {
+  width: 190px;
+}
+.indexs .info.country {
+  width: 150px;
 }
 
 .indexs .profile .detail {
-  width: 650px;
+  width: 130px;
 }
 
 .indexs .btn-container {
-  width: 200px;
+  width: 90px;
   position: absolute;
   right: 0;
 }
