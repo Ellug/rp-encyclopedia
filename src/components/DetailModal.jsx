@@ -4,7 +4,7 @@ import { deleteDoc, setDoc, doc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import '../styles/DetailModal.css';
 
-const DetailModal = ({ character, onClose, onDelete, nowYear }) => {
+const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, characters }) => {
   const [isEditing, setIsEditing] = useState(false);
   const db = getFirestore();
   const originalDocId = `${character.name} ${character.family}`;
@@ -62,6 +62,22 @@ const DetailModal = ({ character, onClose, onDelete, nowYear }) => {
     return {__html: text.replace(/\n/g, '<br />')};
   };
 
+  // 클릭 이벤트 핸들러
+const handleRelationClick = (relationText, charactersList) => {
+  const relationNames = relationText.split(',').map(name => name.trim());
+  
+  // 각 이름에 대해 캐릭터 찾기
+  relationNames.forEach(name => {
+    const [firstName, lastName] = name.split(' ');
+    const foundCharacter = charactersList.find(char => char.name === firstName && char.family === lastName);
+    
+    if (foundCharacter) {
+      // 여기에서 foundCharacter를 사용하여 모달을 열거나 다른 작업 수행
+      openModal(foundCharacter); // 예시: openModal 함수를 호출하여 해당 캐릭터의 모달을 엽니다.
+    }
+  });
+};
+
   return (
     <div className="modal-background" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -84,9 +100,9 @@ const DetailModal = ({ character, onClose, onDelete, nowYear }) => {
               <div className='info talent'>특기 : {character.talent}</div>
               <div className='info body'>신체 사이즈 : {character.body}</div>
               <div className='info country'>출신 : {character.country}</div>
-              <div className='info country'>가족 관계 : {character.familyRelation}</div>
-              <div className='info country'>우호 관계 : {character.goodship}</div>
-              <div className='info country'>적대 관계 : {character.badship}</div>
+              <div className='info country' onClick={() => handleRelationClick(character.familyRelation, characters)}>가족 관계 : {character.familyRelation}</div>
+              <div className='info country' onClick={() => handleRelationClick(character.goodship, characters)}>우호 관계 : {character.goodship}</div>
+              <div className='info country' onClick={() => handleRelationClick(character.badship, characters)}>적대 관계 : {character.badship}</div>
             </div>
             <div className='info-detail' dangerouslySetInnerHTML={createMarkup(character.detail)}></div>
             <div className='btn-container'>

@@ -186,6 +186,8 @@ const Character = () => {
           onClose={closeModal}
           onDelete={deleteCharacter}
           nowYear={currentYear}
+          openModal={openModal}
+          characters={characters}
         />
       )}
 
