@@ -1,7 +1,7 @@
 // src/pages/Character.jsx
 import React, { useState, useEffect } from 'react';
 import app from '../firebaseConfig';
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import '../styles/Character.css';
 import DetailModal from '../components/DetailModal';
 
@@ -81,9 +81,14 @@ const Character = () => {
     } catch (error) {
       console.error("Error adding document: ", error);
     }
+    // 관계 업데이트 호출
+    await updateCharacterRelations(newCharacter, 'familyRelation');
+    await updateCharacterRelations(newCharacter, 'goodship');
+    await updateCharacterRelations(newCharacter, 'badship');
   };
 
   const deleteCharacter = async (id) => {
+    await removeCharacterFromRelations(id);
     try {
       await deleteDoc(doc(db, "char", id));
       closeModal()
@@ -100,6 +105,50 @@ const Character = () => {
   const calculateAge = (birthYear) => {
     return currentYear - birthYear;
   };
+
+  // 캐릭터 관계 업데이트 함수
+  const updateCharacterRelations = async (character, relationField, isRemoval = false) => {
+    const relatedCharacters = character[relationField].split(',').map(name => name.trim());
+
+    for (const relatedName of relatedCharacters) {
+      const [firstName, lastName] = relatedName.split(' ');
+      const relatedDocId = `${firstName} ${lastName}`;
+      const relatedDocRef = doc(db, "char", relatedDocId);
+
+      const relatedDoc = await getDoc(relatedDocRef);
+      if (relatedDoc.exists()) {
+        const relatedData = relatedDoc.data();
+        let updatedRelation;
+        if (isRemoval) {
+          // 캐릭터 제거 시
+          updatedRelation = relatedData[relationField].split(',').filter(name => name.trim() !== `${character.name} ${character.family}`).join(', ');
+        } else {
+          // 캐릭터 추가 시
+          const existingRelations = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
+          if (!existingRelations.includes(`${character.name} ${character.family}`)) {
+            existingRelations.push(`${character.name} ${character.family}`);
+          }
+          updatedRelation = existingRelations.join(', ');
+        }
+        await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation });
+      }
+    }
+  };
+   // 캐릭터 삭제 시 관계 제거 함수
+   const removeCharacterFromRelations = async (characterId) => {
+    const characterRef = doc(db, "char", characterId);
+    const characterDoc = await getDoc(characterRef);
+    if (characterDoc.exists()) {
+      const characterData = characterDoc.data();
+
+      await updateCharacterRelations(characterData, 'familyRelation', true);
+      await updateCharacterRelations(characterData, 'goodship', true);
+      await updateCharacterRelations(characterData, 'badship', true);
+    }
+  };
+
+
+
 
   
   return (

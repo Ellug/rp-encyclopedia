@@ -55,6 +55,17 @@
   text-align: start;
 }
 
+.relation-name {
+  margin: 0 5px;
+  transition: .2s;
+}
+
+.relation-name:hover {
+  cursor: pointer;
+  color: yellow;
+}
+
+
 .edit-input .input-wrapper {
   display: flex;
   width: 100%;

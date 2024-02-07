@@ -1,6 +1,6 @@
 // src/components/DetailModal.jsx
 import React, { useState, useEffect } from 'react';
-import { deleteDoc, setDoc, doc } from 'firebase/firestore';
+import { deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import '../styles/DetailModal.css';
 
@@ -44,6 +44,11 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
         await deleteDoc(originalDocRef);
       }
   
+      // 관련 캐릭터의 정보 업데이트
+      if (character) { // character 객체가 유효한 경우에만 호출
+        await updateRelatedCharacters(character, editCharacter);
+      }
+  
       setIsEditing(false);
       onClose(); // 모달 닫기
     } catch (error) {
@@ -63,20 +68,98 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   };
 
   // 클릭 이벤트 핸들러
-const handleRelationClick = (relationText, charactersList) => {
-  const relationNames = relationText.split(',').map(name => name.trim());
-  
-  // 각 이름에 대해 캐릭터 찾기
-  relationNames.forEach(name => {
-    const [firstName, lastName] = name.split(' ');
-    const foundCharacter = charactersList.find(char => char.name === firstName && char.family === lastName);
-    
+  const handleRelationClick = (e) => {
+    const clickedName = e.target.dataset.name;
+    const foundCharacter = characters.find(char => {
+      // 성과 이름이 모두 있는 경우
+      if (char.family) {
+        return `${char.name} ${char.family}` === clickedName;
+      }
+      // 오직 이름만 있는 경우
+      return char.name === clickedName;
+    });
+
     if (foundCharacter) {
-      // 여기에서 foundCharacter를 사용하여 모달을 열거나 다른 작업 수행
-      openModal(foundCharacter); // 예시: openModal 함수를 호출하여 해당 캐릭터의 모달을 엽니다.
+      openModal(foundCharacter);
     }
-  });
-};
+  };
+
+// 관계 변경 확인 및 업데이트 함수
+  const updateRelatedCharacters = async (originalCharacter, updatedCharacter) => {
+    // Update updated character's relations
+    await updateRelations(originalCharacter, updatedCharacter, 'familyRelation');
+    await updateRelations(originalCharacter, updatedCharacter, 'goodship');
+    await updateRelations(originalCharacter, updatedCharacter, 'badship');
+  };
+
+  // 특정 관계 필드에 대한 변경 확인 및 업데이트 함수
+  const updateRelations = async (originalCharacter, updatedCharacter, relationField) => {
+    const originalRelations = originalCharacter[relationField] ? originalCharacter[relationField].split(',').map(name => name.trim()) : [];
+    const updatedRelations = updatedCharacter[relationField] ? updatedCharacter[relationField].split(',').map(name => name.trim()) : [];
+
+    // 관계의 추가 또는 제거 확인
+    const addedRelations = updatedRelations.filter(name => !originalRelations.includes(name));
+    const removedRelations = originalRelations.filter(name => !updatedRelations.includes(name));
+
+    // 추가된 관계 업데이트
+    for (const relation of addedRelations) {
+      await updateCharacterRelation(relation, updatedCharacter, relationField, true);
+    }
+
+    // 제거된 관계 업데이트
+    for (const relation of removedRelations) {
+      await updateCharacterRelation(relation, updatedCharacter, relationField, false);
+    }
+  };
+
+
+  // 특정 캐릭터의 관계 업데이트
+  const updateCharacterRelation = async (relatedName, character, relationField, isAddition) => {
+    const db = getFirestore();
+
+    // 캐릭터의 전체 이름을 사용해야 하는 경우 (성이 있는 경우)
+    let characterFullName = character.family ? `${character.name} ${character.family}` : character.name;
+
+    // 관련 캐릭터의 문서 참조를 얻기 위한 함수
+    const getRelatedDocRef = async (name) => {
+      let docRef = doc(db, "char", name);
+      let docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists() && name.includes(" ")) {
+        // 이름에 공백이 있는 경우 (예: 'John Doe'), 이름만으로 다시 시도
+        const nameOnly = name.split(" ")[0];
+        docRef = doc(db, "char", nameOnly);
+        docSnap = await getDoc(docRef);
+      }
+
+      return docSnap.exists() ? docRef : null;
+    };
+
+    // 관련 캐릭터의 문서 참조를 얻음
+    const relatedDocRef = await getRelatedDocRef(relatedName);
+    if (!relatedDocRef) return; // 관련 캐릭터가 없으면 함수 종료
+
+    const relatedDocSnap = await getDoc(relatedDocRef);
+    const relatedData = relatedDocSnap.data();
+    let updatedRelation = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
+
+    if (isAddition) {
+      // 관계 추가 (중복 방지를 위해 추가 전 확인)
+      if (!updatedRelation.includes(characterFullName)) {
+        updatedRelation.push(characterFullName);
+      }
+    } else {
+      // 관계 제거
+      updatedRelation = updatedRelation.filter(name => name !== characterFullName);
+    }
+
+    await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation.join(', ') });
+  };
+
+
+
+
+  
 
   return (
     <div className="modal-background" onClick={onClose}>
@@ -100,9 +183,45 @@ const handleRelationClick = (relationText, charactersList) => {
               <div className='info talent'>특기 : {character.talent}</div>
               <div className='info body'>신체 사이즈 : {character.body}</div>
               <div className='info country'>출신 : {character.country}</div>
-              <div className='info country' onClick={() => handleRelationClick(character.familyRelation, characters)}>가족 관계 : {character.familyRelation}</div>
-              <div className='info country' onClick={() => handleRelationClick(character.goodship, characters)}>우호 관계 : {character.goodship}</div>
-              <div className='info country' onClick={() => handleRelationClick(character.badship, characters)}>적대 관계 : {character.badship}</div>
+              <div className='info familyRelation'>
+                가족 관계 : 
+                {character.familyRelation ? character.familyRelation.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : "정보 없음"}
+              </div>
+              <div className='info goodRelation'>
+                우호 관계 : 
+                {character.goodship ? character.goodship.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : "정보 없음"}
+              </div>
+              <div className='info badRelation'>
+                적대 관계 : 
+                {character.badship ? character.badship.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : "정보 없음"}
+              </div>
             </div>
             <div className='info-detail' dangerouslySetInnerHTML={createMarkup(character.detail)}></div>
             <div className='btn-container'>
