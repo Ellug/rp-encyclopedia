@@ -16,8 +16,8 @@
   background-color: rgb(7, 6, 12);
   padding: 50px 100px;
   border: 1px solid #888;
-  width: 70%;
-  height: 60%;
+  width: 75%;
+  height: 65%;
   position: relative;
   overflow-y: scroll;
   z-index: 1012;
@@ -26,8 +26,8 @@
 .close {
   color: #aaa;
   position: fixed;
-  top: 14%;
-  right: 11%;
+  top: 12%;
+  right: 9%;
   font-size: 32px;
   font-weight: bold;
   cursor: pointer;
