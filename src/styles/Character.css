@@ -7,6 +7,25 @@
   position: relative;
 }
 
+.years {
+  font-size: 22px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.years input {
+  width: 60px;
+  font-size: 22px;
+}
+
+.search {
+  font-size: 20px;
+}
+.search input {
+  width: 170px;
+  font-size: 20px;
+}
+
+
 .add-inputs {
   display: block;
   width: 1400px;
@@ -66,6 +85,7 @@
   transform: scale(1.05);
   transition: .2s;
 }
+
 .indexs .info.fam {
   width: 130px;
 }

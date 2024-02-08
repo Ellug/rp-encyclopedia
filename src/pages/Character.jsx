@@ -9,7 +9,8 @@ const Character = () => {
   const [characters, setCharacters] = useState([]);
   const [newCharacter, setNewCharacter] = useState({
     birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-    weapon: '', hobby: '', talent: '', body: '', country: '', familyRelation: '', goodship: '', badship: ''
+    weapon: '', hobby: '', talent: '', body: '', country: '', familyRelation: '', goodship: '', badship: '',
+    marriage: '', brother: '', parent: '', child: '',
   });
   const [editCharacter, setEditCharacter] = useState({});
   const db = getFirestore(app);
@@ -18,6 +19,8 @@ const Character = () => {
 
   const [selectedFamily, setSelectedFamily] = useState('');
   const [selectedParty, setSelectedParty] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   // 모달 열기
   const openModal = (character) => {
@@ -34,29 +37,40 @@ const Character = () => {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "char"), (snapshot) => {
       let characterList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (selectedFamily || selectedParty) {
-        characterList = characterList.sort((a, b) => {
-          if (selectedFamily && (a.family === selectedFamily && b.family !== selectedFamily)) {
-            return -1;
-          }
-          if (selectedFamily && (a.family !== selectedFamily && b.family === selectedFamily)) {
-            return 1;
-          }
-          if (selectedParty && (a.party === selectedParty && b.party !== selectedParty)) {
-            return -1;
-          }
-          if (selectedParty && (a.party !== selectedParty && b.party === selectedParty)) {
-            return 1;
-          }
-          return a.birth - b.birth; // Default sorting by birth
-        });
-      } else {
-        characterList = characterList.sort((a, b) => a.birth - b.birth); // Default sorting by birth
+  
+      // 검색어에 따른 필터링 (detail, badship, body 필드 제외)
+      if (searchTerm) {
+        characterList = characterList.filter(character =>
+          Object.entries(character).some(([key, value]) =>
+            !['detail', 'badship', 'body'].includes(key) && 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        );
       }
+  
+      // 선택된 가족 또는 파티에 따른 정렬
+      characterList = characterList.sort((a, b) => {
+        if (selectedFamily && (a.family === selectedFamily && b.family !== selectedFamily)) {
+          return -1;
+        }
+        if (selectedFamily && (a.family !== selectedFamily && b.family === selectedFamily)) {
+          return 1;
+        }
+        if (selectedParty && (a.party === selectedParty && b.party !== selectedParty)) {
+          return -1;
+        }
+        if (selectedParty && (a.party !== selectedParty && b.party === selectedParty)) {
+          return 1;
+        }
+        return a.birth - b.birth; // 기본 정렬은 생년월일에 따라
+      });
+  
       setCharacters(characterList);
     });
     return () => unsubscribe();
-  }, [db, selectedFamily, selectedParty]);
+  }, [db, searchTerm, selectedFamily, selectedParty]);
+  
+
 
   const handleFamilyClick = (familyName) => {
     setSelectedFamily(familyName);
@@ -64,6 +78,18 @@ const Character = () => {
   const handlePartyClick = (partyName) => {
     setSelectedParty(partyName);
   };
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  // 하이라이트 처리 함수
+  const highlightText = (text, highlight) => {
+    if (!highlight.trim() || !text) {
+      return text;
+    }
+    const regex = new RegExp(`(${highlight})`, 'gi');
+    return text.replace(regex, '<span style="color: rgb(230, 230, 88);">$1</span>');
+  };
+
 
 
   const handleNewCharacterChange = (e) => {
@@ -103,12 +129,6 @@ const Character = () => {
   const handleYearChange = (e) => {
     setCurrentYear(e.target.value);
   };
-
-  // 나이 계산 함수
-  const calculateAge = (birthYear) => {
-    return currentYear - birthYear;
-  };
-
 
   // 캐릭터 관계 업데이트 함수
   const updateCharacterRelations = async (character, relationField, isRemoval = false) => {
@@ -170,61 +190,85 @@ const Character = () => {
   };
 
 
-
+  
+  // 나이 계산 함수
+  const calculateAge = (birthYear) => {
+    return currentYear - birthYear;
+  };
 
   
   return (
     <div className='char-comp'>
-      {/* 연도 입력 필드 */}
-      <div>
+      <div className='years'>
         현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
+      </div>
+      <div className='search'>
+        검색: <input type='text' placeholder='search' value={searchTerm} onChange={handleSearchChange} />
       </div>
 
       <div style={{ height: '700px', width: '1800px', overflowY: 'scroll', margin: '10px auto', padding: '10px', border: '1px solid white', position: 'relative' }}>
-      {characters.map((character) => (
+        {characters.map((character) => (
           <div className='indexs' key={character.id}>
-              <div className='infos'>
-                <div className='profile'>
-                  <div className='info birth'>
-                    {character.birth}</div>
-                    <div className='info name' onClick={() => openModal(character)}>
-                      {character.name?.substring(0, 6)}{character.name?.length > 6 ? '...' : ''}
-                    </div>
-                    <div className='info fam' onClick={() => handleFamilyClick(character.family)}>
-                      {character.family?.substring(0, 7)}{character.family?.length > 7 ? '...' : ''}
-                    </div>
-                    <div className='info title'>
-                      {character.title?.substring(0, 9)}{character.title?.length > 9 ? '...' : ''}
-                    </div>
-                  <div className='info age'>
-                    {calculateAge(character.birth)}세</div>
-                  <div className='info gen'>
-                    {character.gender}</div>
-                  <div className='info unit'>
-                    {character.unit?.substring(0, 5)}{character.unit?.length > 5 ? '...' : ''}
-                    </div>
-                  <div className='info party' onClick={() => handlePartyClick(character.party)}>
-                    {character.party?.substring(0, 10)}{character.party?.length > 10 ? '...' : ''}
-                  </div>
-                  <div className='info personality'>
-                    {character.personality}</div>
-                  <div className='info weapon'>
-                    {character.weapon?.substring(0, 11)}{character.weapon?.length > 11 ? '...' : ''}
-                  </div>
-                  <div className='info hobby'>
-                    {character.hobby?.substring(0, 6)}{character.hobby?.length > 6 ? '...' : ''}
-                  </div>
-                  <div className='info talent'>
-                    {character.talent?.substring(0, 6)}{character.talent?.length > 6 ? '...' : ''}
-                  </div>
-                  <div className='info body'>
-                    {character.body?.substring(0, 14)}{character.body?.length > 14 ? '...' : ''}
-                  </div>
-                  <div className='info country'>
-                    {character.country?.substring(0, 8)}{character.country?.length > 8 ? '...' : ''}
-                  </div>
+            <div className='infos'>
+              <div className='profile'>
+                {/* birth 필드 */}
+                <div className='info birth'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.birth, searchTerm) }}></span>
+                </div>
+                {/* name 필드 */}
+                <div className='info name' onClick={() => openModal(character)}>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.name?.substring(0, 6), searchTerm) }}></span>{character.name?.length > 6 ? '...' : ''}
+                </div>
+                {/* family 필드 */}
+                <div className='info fam' onClick={() => handleFamilyClick(character.family)}>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.family?.substring(0, 7), searchTerm) }}></span>{character.family?.length > 7 ? '...' : ''}
+                </div>
+                {/* title 필드 */}
+                <div className='info title'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.title?.substring(0, 9), searchTerm) }}></span>{character.title?.length > 9 ? '...' : ''}
+                </div>
+                {/* age 필드 */}
+                <div className='info age'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(String(calculateAge(character.birth)) + '세', searchTerm) }}></span>
+                </div>
+                {/* gender 필드 */}
+                <div className='info gen'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.gender, searchTerm) }}></span>
+                </div>
+                {/* unit 필드 */}
+                <div className='info unit'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.unit?.substring(0, 5), searchTerm) }}></span>{character.unit?.length > 5 ? '...' : ''}
+                </div>
+                {/* party 필드 */}
+                <div className='info party' onClick={() => handlePartyClick(character.party)}>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.party?.substring(0, 10), searchTerm) }}></span>{character.party?.length > 10 ? '...' : ''}
+                </div>
+                {/* personality 필드 */}
+                <div className='info personality'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.personality, searchTerm) }}></span>
+                </div>
+                {/* weapon 필드 */}
+                <div className='info weapon'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.weapon?.substring(0, 11), searchTerm) }}></span>{character.weapon?.length > 11 ? '...' : ''}
+                </div>
+                {/* hobby 필드 */}
+                <div className='info hobby'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.hobby?.substring(0, 6), searchTerm) }}></span>{character.hobby?.length > 6 ? '...' : ''}
+                </div>
+                {/* talent 필드 */}
+                <div className='info talent'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.talent?.substring(0, 6), searchTerm) }}></span>{character.talent?.length > 6 ? '...' : ''}
+                </div>
+                {/* body 필드 */}
+                <div className='info body'>
+                  {character.body?.substring(0, 14)}{character.body?.length > 14 ? '...' : ''}
+                </div>
+                {/* country 필드 */}
+                <div className='info country'>
+                  <span dangerouslySetInnerHTML={{ __html: highlightText(character.country?.substring(0, 8), searchTerm) }}></span>{character.country?.length > 8 ? '...' : ''}
                 </div>
               </div>
+            </div>
           </div>
         ))}
       </div>

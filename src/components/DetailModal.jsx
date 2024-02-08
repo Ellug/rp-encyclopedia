@@ -44,14 +44,12 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
         const originalDocRef = doc(db, "char", originalDocId);
         await deleteDoc(originalDocRef);
       }
-  
       // 관련 캐릭터의 정보 업데이트
       if (character) { // character 객체가 유효한 경우에만 호출
         await updateRelatedCharacters(character, editCharacter);
       }
-  
       setIsEditing(false);
-      onClose(); // 모달 닫기
+      onClose();
     } catch (error) {
       console.error("Error saving document: ", error);
     }
@@ -85,7 +83,6 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
       // 오직 이름만 있는 경우
       return char.name === clickedName;
     });
-
     if (foundCharacter) {
       openModal(foundCharacter);
     }
@@ -94,12 +91,10 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
 
 // 관계 변경 확인 및 업데이트 함수
   const updateRelatedCharacters = async (originalCharacter, updatedCharacter) => {
-    // Update updated character's relations
-    await updateRelations(originalCharacter, updatedCharacter, 'familyRelation');
-    await updateRelations(originalCharacter, updatedCharacter, 'marriage');
-    await updateRelations(originalCharacter, updatedCharacter, 'brother');
-    await updateRelations(originalCharacter, updatedCharacter, 'goodship');
-    await updateRelations(originalCharacter, updatedCharacter, 'badship');
+    const relationFields = ['familyRelation', 'marriage', 'brother', 'goodship', 'badship', ];
+    for (const field of relationFields) {
+      await updateRelations(originalCharacter, updatedCharacter, field);
+    }
   };
 
   // 특정 관계 필드에 대한 변경 확인 및 업데이트 함수
@@ -115,7 +110,6 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     for (const relation of addedRelations) {
       await updateCharacterRelation(relation, updatedCharacter, relationField, true);
     }
-
     // 제거된 관계 업데이트
     for (const relation of removedRelations) {
       await updateCharacterRelation(relation, updatedCharacter, relationField, false);
