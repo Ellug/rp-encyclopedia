@@ -128,11 +128,12 @@
 }
 
 .char-comp button {
-  width: 80px;
+  width: 130px;
   height: 40px;
   border: 1px solid black;
   border-radius: 15px;
   background-color: blanchedalmond;
+  font-size: 17px;
   font-weight: 600;
   margin: auto 2px;
   transition: .2s;

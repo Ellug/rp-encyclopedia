@@ -33,14 +33,47 @@
 }
 
 .family-map {
-  /* 가계도 스타일 */
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
 }
 
-.family-map span {
-  margin: 10px;
+.map-up {
+  display: flex;
+  margin-bottom: 30px;
+}
+.map-up div {
+  width: 150px;
+  height: 20px;
+  border: 1px solid white;
+  padding: 10px;
+  margin-left: 20px;
+}
+
+.map-side {
+  display: flex;
+  margin-bottom: 30px;
+}
+.map-side div {
+  width: 150px;
+  height: 20px;
+  border: 1px solid white;
+  padding: 10px;
+  margin-left: 20px;
 }
 .map-name {
   color: yellow;
   border: 1px solid yellow;
   padding: 10px;
+}
+
+.map-down {
+  display: flex;
+}
+.map-down div {
+  width: 150px;
+  height: 20px;
+  border: 1px solid white;
+  padding: 10px;
+  margin-left: 20px;
 }
