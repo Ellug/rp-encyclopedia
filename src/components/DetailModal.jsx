@@ -89,13 +89,43 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   };
 
 
-// 관계 변경 확인 및 업데이트 함수
   const updateRelatedCharacters = async (originalCharacter, updatedCharacter) => {
-    const relationFields = ['familyRelation', 'marriage', 'brother', 'goodship', 'badship', ];
+    const relationFields = ['familyRelation', 'marriage', 'brother', 'goodship', 'badship'];
+    const parentChildField = 'parent';
+  
     for (const field of relationFields) {
       await updateRelations(originalCharacter, updatedCharacter, field);
     }
+  
+    // 부모-자식 관계 업데이트
+    await updateParentChildRelations(originalCharacter, updatedCharacter, parentChildField);
   };
+    
+  // 부모-자식 관계에 대한 변경 확인 및 업데이트 함수
+  const updateParentChildRelations = async (originalCharacter, updatedCharacter) => {
+    // 부모 관계 변경 확인
+    await updateSpecificRelation(originalCharacter, updatedCharacter, 'parent', 'child');
+
+    // 자식 관계 변경 확인
+    await updateSpecificRelation(originalCharacter, updatedCharacter, 'child', 'parent');
+  };
+
+  // 특정 관계 필드에 대한 변경 확인 및 업데이트 함수
+  const updateSpecificRelation = async (originalCharacter, updatedCharacter, sourceField, targetField) => {
+    const originalRelations = originalCharacter[sourceField] ? originalCharacter[sourceField].split(',').map(name => name.trim()) : [];
+    const updatedRelations = updatedCharacter[sourceField] ? updatedCharacter[sourceField].split(',').map(name => name.trim()) : [];
+
+    // 추가된 관계 확인 및 업데이트
+    for (const relation of updatedRelations.filter(name => !originalRelations.includes(name))) {
+      await updateCharacterRelation(relation, updatedCharacter, targetField, true);
+    }
+
+    // 제거된 관계 확인 및 업데이트
+    for (const relation of originalRelations.filter(name => !updatedRelations.includes(name))) {
+      await updateCharacterRelation(relation, updatedCharacter, targetField, false);
+    }
+  };
+  
 
   // 특정 관계 필드에 대한 변경 확인 및 업데이트 함수
   const updateRelations = async (originalCharacter, updatedCharacter, relationField) => {
@@ -159,11 +189,6 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
 
     await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation.join(', ') });
   };
-
-
-
-
-
 
   
 
