@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import '../styles/DetailModal.css';
+import FamilyMapModal from './FamilyMapModal';
 
 const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, characters }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -190,6 +191,14 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation.join(', ') });
   };
 
+
+  const [showFamilyMap, setShowFamilyMap] = useState(false);
+
+  // 가계도 모달 열기
+  const openFamilyMap = () => {
+    setShowFamilyMap(true);
+  };
+
   
 
   return (
@@ -219,7 +228,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 가족 관계 : 
                 {character.familyRelation ? character.familyRelation.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -232,7 +241,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 배우자 : 
                 {character.marriage ? character.marriage.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -245,7 +254,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 부모 : 
                 {character.parent ? character.parent.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -258,7 +267,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 자식 : 
                 {character.child ? character.child.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -271,7 +280,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 형제 : 
                 {character.brother ? character.brother.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -285,7 +294,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 우호 관계 : 
                 {character.goodship ? character.goodship.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`} 
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -298,7 +307,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 적대 관계 : 
                 {character.badship ? character.badship.split(',').map(name => (
                   <span 
-                    key={name.trim()} 
+                    key={`${name.trim()} ${name.family}`}  
                     data-name={name.trim()} 
                     onClick={handleRelationClick}
                     className="relation-name"
@@ -310,6 +319,8 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
             </div>
             <div className='info-detail' dangerouslySetInnerHTML={createMarkup(character.detail)}></div>
             <div className='btn-container'>
+              <button onClick={openFamilyMap}>가계도 보기</button>
+              {showFamilyMap && <FamilyMapModal character={character} onClose={() => setShowFamilyMap(false)} />}
               <button onClick={() => setIsEditing(true)}>수정</button>
               <button onClick={confirmDeletion}>삭제</button>
             </div>

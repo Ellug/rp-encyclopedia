@@ -21,6 +21,7 @@ const Character = () => {
   const [selectedParty, setSelectedParty] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+
   // 모달 열기
   const openModal = (character) => {
     setEditCharacter(character);
@@ -88,6 +89,7 @@ const Character = () => {
     const regex = new RegExp(`(${highlight})`, 'gi');
     return text.replace(regex, '<span style="color: rgb(230, 230, 88);">$1</span>');
   };
+  
 
 
 
@@ -129,33 +131,46 @@ const Character = () => {
     setCurrentYear(e.target.value);
   };
 
-
   // 캐릭터 관계 업데이트 함수
   const updateCharacterRelations = async (character, relationField, isRemoval = false) => {
     const relatedCharacters = character[relationField].split(',').map(name => name.trim());
-
+  
     for (const relatedName of relatedCharacters) {
-      const [firstName, lastName] = relatedName.split(' ');
-      const relatedDocId = `${firstName} ${lastName}`;
+      const nameParts = relatedName.split(' ');
+      let relatedDocId;
+      let charNameForRelation;
+  
+      if (nameParts.length === 1) {
+        // 오직 firstName만 있는 경우
+        relatedDocId = nameParts[0];
+        charNameForRelation = character.name;
+      } else {
+        // firstName과 lastName 모두 있는 경우
+        const [firstName, lastName] = nameParts;
+        relatedDocId = `${firstName} ${lastName}`;
+        charNameForRelation = `${character.name} ${character.family}`;
+      }
+  
       const relatedDocRef = doc(db, "char", relatedDocId);
-
       const relatedDoc = await getDoc(relatedDocRef);
+  
       if (relatedDoc.exists()) {
         const relatedData = relatedDoc.data();
         let updatedRelation;
+  
+        const existingRelations = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
+  
         if (isRemoval) {
           // 캐릭터 제거 시
-          updatedRelation = relatedData[relationField].split(',').filter(name => name.trim() !== `${character.name} ${character.family}`).join(', ');
+          updatedRelation = existingRelations.filter(name => name !== charNameForRelation).join(', ');
         } else {
           // 캐릭터 추가 시
-          const existingRelations = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
-          if (!existingRelations.includes(`${character.name} ${character.family}`)) {
-            existingRelations.push(`${character.name} ${character.family}`);
-          } else if (!existingRelations.includes(`${character.name}`)) {
-            existingRelations.push(`${character.name}`)
+          if (!existingRelations.includes(charNameForRelation)) {
+            existingRelations.push(charNameForRelation);
           }
           updatedRelation = existingRelations.join(', ');
         }
+  
         await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation });
       }
     }
@@ -176,11 +191,12 @@ const Character = () => {
   };
 
 
-
+  
   // 나이 계산 함수
   const calculateAge = (birthYear) => {
     return currentYear - birthYear;
   };
+
   
   return (
     <div className='char-comp'>
