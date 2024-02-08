@@ -123,3 +123,15 @@
   color: white;
   cursor: pointer;
 }
+
+button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transition: none;
+}
+button:disabled:hover {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}

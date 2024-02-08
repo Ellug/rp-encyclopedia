@@ -12,7 +12,8 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   const createDefaultCharacter = (characterData) => {
     const fields = 
       ['birth', 'name', 'family', 'title', 'gender', 'unit', 'party', 'personality', 'weapon',
-      'hobby', 'talent', 'body', 'country', 'familyRelation', 'goodship', 'badship', 'detail'];
+      'hobby', 'talent', 'body', 'country', 'familyRelation', 'goodship', 'badship', 'detail',
+      'marriage', 'parent', 'child', 'brother'];
     const defaultCharacter = {};
     fields.forEach(field => {
       defaultCharacter[field] = characterData[field] || ''; // 존재하지 않는 필드는 빈 문자열로 설정
@@ -31,7 +32,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   };
 
   const saveEdit = async () => {
-    const newDocId = `${editCharacter.name} ${editCharacter.family}`;
+    const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
     const newDocRef = doc(db, "char", newDocId);
   
     try {
@@ -61,6 +62,12 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     setIsEditing(false);
   };
 
+  const confirmDeletion = () => {
+    if(window.confirm("정말로 삭제하시겠습니까?")) {
+      onDelete(character.id);
+    }
+  };
+
   const calculateAge = (birthYear) => nowYear - birthYear;
 
   const createMarkup = (text) => {
@@ -84,10 +91,13 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     }
   };
 
+
 // 관계 변경 확인 및 업데이트 함수
   const updateRelatedCharacters = async (originalCharacter, updatedCharacter) => {
     // Update updated character's relations
     await updateRelations(originalCharacter, updatedCharacter, 'familyRelation');
+    await updateRelations(originalCharacter, updatedCharacter, 'marriage');
+    await updateRelations(originalCharacter, updatedCharacter, 'brother');
     await updateRelations(originalCharacter, updatedCharacter, 'goodship');
     await updateRelations(originalCharacter, updatedCharacter, 'badship');
   };
@@ -159,6 +169,8 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
 
 
 
+
+
   
 
   return (
@@ -183,6 +195,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
               <div className='info talent'>특기 : {character.talent}</div>
               <div className='info body'>신체 사이즈 : {character.body}</div>
               <div className='info country'>출신 : {character.country}</div>
+              <br/>
               <div className='info familyRelation'>
                 가족 관계 : 
                 {character.familyRelation ? character.familyRelation.split(',').map(name => (
@@ -194,9 +207,62 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                   >
                     {name.trim()}
                   </span>
-                )) : "정보 없음"}
+                )) : " 정보 없음 "}
               </div>
-              <div className='info goodRelation'>
+              <div className='info familyRelation'>
+                배우자 : 
+                {character.marriage ? character.marriage.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : " 정보 없음 "}
+              </div>
+              <div className='info familyRelation'>
+                부모 : 
+                {character.parent ? character.parent.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : " 정보 없음 "}
+              </div>
+              <div className='info familyRelation'>
+                자식 : 
+                {character.child ? character.child.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : " 정보 없음 "}
+              </div>
+              <div className='info familyRelation'>
+                형제 : 
+                {character.brother ? character.brother.split(',').map(name => (
+                  <span 
+                    key={name.trim()} 
+                    data-name={name.trim()} 
+                    onClick={handleRelationClick}
+                    className="relation-name"
+                  >
+                    {name.trim()}
+                  </span>
+                )) : " 정보 없음 "}
+              </div>
+              <br/>
+              <div className='info-goodRelation'>
                 우호 관계 : 
                 {character.goodship ? character.goodship.split(',').map(name => (
                   <span 
@@ -207,9 +273,9 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                   >
                     {name.trim()}
                   </span>
-                )) : "정보 없음"}
+                )) : " 정보 없음 "}
               </div>
-              <div className='info badRelation'>
+              <div className='info-badRelation'>
                 적대 관계 : 
                 {character.badship ? character.badship.split(',').map(name => (
                   <span 
@@ -220,13 +286,13 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                   >
                     {name.trim()}
                   </span>
-                )) : "정보 없음"}
+                )) : " 정보 없음 "}
               </div>
             </div>
             <div className='info-detail' dangerouslySetInnerHTML={createMarkup(character.detail)}></div>
             <div className='btn-container'>
               <button onClick={() => setIsEditing(true)}>수정</button>
-              <button onClick={() => onDelete(character.id)}>삭제</button>
+              <button onClick={confirmDeletion}>삭제</button>
             </div>
         </>
         ) : (
@@ -246,16 +312,16 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
                 칭호 <input type="text" name="title" value={editCharacter.title} onChange={handleEditChange} placeholder="Title" />
               </div>
               <div className="input-wrapper">
-                성별 <input type="text" name="gender" value={editCharacter.gender} onChange={handleEditChange} placeholder="Gender" />
+                성별 <input type="string" name="gender" value={editCharacter.gender} onChange={handleEditChange} placeholder="Gender" />
               </div>
               <div className="input-wrapper">
-                유닛 <input type="text" name="unit" value={editCharacter.unit} onChange={handleEditChange} placeholder="Unit" />
+                유닛 <input type="string" name="unit" value={editCharacter.unit} onChange={handleEditChange} placeholder="Unit" />
               </div>
               <div className="input-wrapper">
                 소속 <input type="text" name="party" value={editCharacter.party} onChange={handleEditChange} placeholder="Party" />
               </div>
               <div className="input-wrapper">
-                성향 <input type="text" name="personality" value={editCharacter.personality} onChange={handleEditChange} placeholder="Personality" />
+                성향 <input type="string" name="personality" value={editCharacter.personality} onChange={handleEditChange} placeholder="Personality" />
               </div>
               <div className="input-wrapper">
                 무기, 유파 <input type="text" name="weapon" value={editCharacter.weapon} onChange={handleEditChange} placeholder="Weapon" />
@@ -274,6 +340,18 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
               </div>
               <div className="input-wrapper">
                 가족 관계 <input type="text" name="familyRelation" value={editCharacter.familyRelation} onChange={handleEditChange} placeholder="Family Relation" />
+              </div>
+              <div className="input-wrapper">
+                배우자 <input type="text" name="marriage" value={editCharacter.marriage} onChange={handleEditChange} placeholder="marriage" />
+              </div>
+              <div className="input-wrapper">
+                부모 <input type="text" name="parent" value={editCharacter.parent} onChange={handleEditChange} placeholder="parent" />
+              </div>
+              <div className="input-wrapper">
+                자식 <input type="text" name="child" value={editCharacter.child} onChange={handleEditChange} placeholder="child" />
+              </div>
+              <div className="input-wrapper">
+                형제 <input type="text" name="brother" value={editCharacter.brother} onChange={handleEditChange} placeholder="brother" />
               </div>
               <div className="input-wrapper">
                 우호 관계 <input type="text" name="goodship" value={editCharacter.goodship} onChange={handleEditChange} placeholder="Goodship" />

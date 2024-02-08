@@ -11,7 +11,7 @@
   color: white;
   box-sizing: border-box;
   padding: 10px 50px;
-  z-index: 1001;
+  z-index: 101;
 }
 
 .navbar .navbar-left {

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import app from '../firebaseConfig';
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import '../styles/Character.css';
-import DetailModal from '../components/DetailModal';
+import DetailModal from '../components/DetailModal.jsx';
 
 const Character = () => {
   const [characters, setCharacters] = useState([]);
@@ -77,12 +77,15 @@ const Character = () => {
       await setDoc(doc(db, "char", docId), newCharacter);
       setNewCharacter({ 
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-        weapon: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '' });
+        weapon: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '',
+        marriage: '', parent: '', child: '', brother: '', });
     } catch (error) {
       console.error("Error adding document: ", error);
     }
     // 관계 업데이트 호출
     await updateCharacterRelations(newCharacter, 'familyRelation');
+    await updateCharacterRelations(newCharacter, 'marriage');
+    await updateCharacterRelations(newCharacter, 'brother');
     await updateCharacterRelations(newCharacter, 'goodship');
     await updateCharacterRelations(newCharacter, 'badship');
   };
@@ -106,30 +109,47 @@ const Character = () => {
     return currentYear - birthYear;
   };
 
+
   // 캐릭터 관계 업데이트 함수
   const updateCharacterRelations = async (character, relationField, isRemoval = false) => {
     const relatedCharacters = character[relationField].split(',').map(name => name.trim());
-
+  
     for (const relatedName of relatedCharacters) {
-      const [firstName, lastName] = relatedName.split(' ');
-      const relatedDocId = `${firstName} ${lastName}`;
+      const nameParts = relatedName.split(' ');
+      let relatedDocId;
+      let charNameForRelation;
+  
+      if (nameParts.length === 1) {
+        // 오직 firstName만 있는 경우
+        relatedDocId = nameParts[0];
+        charNameForRelation = character.name;
+      } else {
+        // firstName과 lastName 모두 있는 경우
+        const [firstName, lastName] = nameParts;
+        relatedDocId = `${firstName} ${lastName}`;
+        charNameForRelation = `${character.name} ${character.family}`;
+      }
+  
       const relatedDocRef = doc(db, "char", relatedDocId);
-
       const relatedDoc = await getDoc(relatedDocRef);
+  
       if (relatedDoc.exists()) {
         const relatedData = relatedDoc.data();
         let updatedRelation;
+  
+        const existingRelations = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
+  
         if (isRemoval) {
           // 캐릭터 제거 시
-          updatedRelation = relatedData[relationField].split(',').filter(name => name.trim() !== `${character.name} ${character.family}`).join(', ');
+          updatedRelation = existingRelations.filter(name => name !== charNameForRelation).join(', ');
         } else {
           // 캐릭터 추가 시
-          const existingRelations = relatedData[relationField] ? relatedData[relationField].split(',').map(name => name.trim()) : [];
-          if (!existingRelations.includes(`${character.name} ${character.family}`)) {
-            existingRelations.push(`${character.name} ${character.family}`);
+          if (!existingRelations.includes(charNameForRelation)) {
+            existingRelations.push(charNameForRelation);
           }
           updatedRelation = existingRelations.join(', ');
         }
+  
         await setDoc(relatedDocRef, { ...relatedData, [relationField]: updatedRelation });
       }
     }
@@ -142,6 +162,8 @@ const Character = () => {
       const characterData = characterDoc.data();
 
       await updateCharacterRelations(characterData, 'familyRelation', true);
+      await updateCharacterRelations(characterData, 'marriage', true);
+      await updateCharacterRelations(characterData, 'brother', true);
       await updateCharacterRelations(characterData, 'goodship', true);
       await updateCharacterRelations(characterData, 'badship', true);
     }
@@ -226,7 +248,7 @@ const Character = () => {
         </div>
         <textarea className='add-detail' type="text" name="detail" value={newCharacter.detail} onChange={handleNewCharacterChange } placeholder="Detail" />
       </div>
-      <button onClick={addCharacter}>추가</button>
+      <button onClick={addCharacter} disabled={!newCharacter.name}>추가</button>
 
        {/* 모달 */}
        {showModal && (
