@@ -9,26 +9,30 @@
   background-color: transparent;
 }
 
-.profile-img img {
+
+.img-container {
   width: 500px;
   height: 600px;
+  display: flex;
 }
-.profile-img .img-container {
-  width: 500px;
-  height: 600px;
-}
-.profile-img img {
-  max-width: 500px;
+.img-container img {
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
   height: auto;
+  object-fit: contain;
+  margin-bottom: auto;
 }
 
 .profile-container button {
   border: none;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.5);
   width: auto;
   height: auto;
-  background-color: transparent;
+  background-color: rgba(128, 128, 128, 0.504);
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .profile-container button:hover {
   color: rgba(148, 148, 148, 0.8);
