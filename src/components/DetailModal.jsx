@@ -1,18 +1,26 @@
 // src/components/DetailModal.jsx
 import React, { useState, useEffect } from 'react';
-import { deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
+import { deleteDoc, setDoc, doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import '../styles/DetailModal.css';
 import FamilyMapModal from './FamilyMapModal';
+import ImageUpload from './ImageUpload';
 
 const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, characters }) => {
   const [isEditing, setIsEditing] = useState(false);
   const db = getFirestore();
   const originalDocId = `${character.name} ${character.family}`;
 
+  // 새로운 상태 추가: 검색 텍스트와 검색 결과
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  // 현재 활성화된 입력 필드를 추적하는 상태
+  const [activeField, setActiveField] = useState('');
+
+
   const createDefaultCharacter = (characterData) => {
     const fields = 
-      ['birth', 'name', 'family', 'title', 'gender', 'unit', 'party', 'personality', 'weapon',
+      ['birth', 'name', 'family', 'title', 'gender', 'unit', 'party', 'personality', 'weapon', 'skill',
       'hobby', 'talent', 'body', 'country', 'familyRelation', 'goodship', 'badship', 'detail',
       'marriage', 'parent', 'child', 'brother'];
     const defaultCharacter = {};
@@ -199,7 +207,85 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     setShowFamilyMap(true);
   };
 
-  
+  // 관계 인풋창 입력어 추천 로직
+  // 일반화된 입력 필드 변경 이벤트 핸들러
+  const handleRelationEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditCharacter({ ...editCharacter, [name]: value });
+    setActiveField(name);
+
+    if (['familyRelation', 'marriage', 'parent', 'child', 'brother', 'goodship', 'badship'].includes(name)) {
+      setSearchText(value.split(',').pop().trim()); // 마지막 이름 추출
+      if (value) {
+        searchFamilyRelations(name); // 검색 실행
+      } else {
+        setSearchResults([]); // 텍스트가 비어있으면 결과 초기화
+      }
+    }
+  };
+
+  const getNextString = (str) => {
+    // 문자열의 마지막 문자를 찾고 다음 문자를 계산
+    const lastChar = str.charAt(str.length - 1);
+    const nextLastChar = String.fromCharCode(lastChar.charCodeAt(0) + 1);
+    return str.substring(0, str.length - 1) + nextLastChar;
+  };
+
+  // 가족 관계 검색 로직
+  const searchFamilyRelations = async () => {
+    if (!searchText) return;
+    const endText = getNextString(searchText);
+
+    const nameQuery = query(
+      collection(db, "char"),
+      where("name", ">=", searchText),
+      where("name", "<=", endText)
+    );
+
+    const familyQuery = query(
+      collection(db, "char"),
+      where("family", ">=", searchText),
+      where("family", "<=", endText)
+    );
+
+    try {
+      // 이름에 대한 검색 결과
+      const nameSnapshot = await getDocs(nameQuery);
+      const nameResults = nameSnapshot.docs.map(doc => {
+        const docData = doc.data();
+        return docData.family ? `${docData.name} ${docData.family}` : docData.name;
+      });
+
+      // 성에 대한 검색 결과
+      const familySnapshot = await getDocs(familyQuery);
+      const familyResults = familySnapshot.docs.map(doc => {
+        const docData = doc.data();
+        return docData.family ? `${docData.name} ${docData.family}` : docData.name;
+      });
+
+      // 결과 병합 및 중복 제거
+      const combinedResults = Array.from(new Set([...nameResults, ...familyResults]));
+      setSearchResults(combinedResults);
+    } catch (error) {
+      console.error("Error searching characters: ", error);
+    }
+  };
+
+// 일반화된 검색 결과 선택 로직
+  const selectSearchResult = (field, selectedName) => {
+    let currentFieldValues = editCharacter[field].split(',').map(item => item.trim());
+    if (currentFieldValues.length > 0 && currentFieldValues[currentFieldValues.length - 1] === searchText) {
+      currentFieldValues.pop();
+    }
+    currentFieldValues.push(selectedName.trim());
+    const uniqueFieldValues = Array.from(new Set(currentFieldValues));
+    const updatedField = uniqueFieldValues.join(', ');
+    setEditCharacter({ ...editCharacter, [field]: updatedField });
+    setSearchResults([]); // 추천 목록 초기화
+    setSearchText(''); // 검색 텍스트 초기화
+  };
+
+
 
   return (
     <div className="modal-background" onClick={onClose}>
@@ -210,6 +296,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
          {!isEditing ? (
           <>
             <div className='detail-profile'>
+              <ImageUpload character={character} editCharacter={editCharacter} />
               <div className='info-title'>{character.title}</div>
               <div className='info-name'>{character.name} {character.family}</div>
               <div className='info fam'>가문: {character.family}</div>
@@ -218,7 +305,8 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
               <div className='info unit'>유닛 : {character.unit}</div>
               <div className='info party'>소속 : {character.party}</div>
               <div className='info personality'>성향 : {character.personality}</div>
-              <div className='info weapon'>무기/유파 : {character.weapon}</div>
+              <div className='info weapon'>무기 : {character.weapon}</div>
+              <div className='info skill'>스킬 : {character.skill}</div>
               <div className='info hobby'>취미 : {character.hobby}</div>
               <div className='info talent'>특기 : {character.talent}</div>
               <div className='info body'>신체 사이즈 : {character.body}</div>
@@ -329,66 +417,147 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
           <>
             {/* 인풋 필드들 */}
             <div className="edit-input">
+            <div className="input-wrapper">
+              출생 <input type="number" name="birth" value={editCharacter.birth} onChange={handleEditChange} placeholder="Birth" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              이름 <input type="text" name="name" value={editCharacter.name} onChange={handleEditChange} placeholder="Name" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              성 <input type="text" name="family" value={editCharacter.family} onChange={handleEditChange} placeholder="Family" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              칭호 <input type="text" name="title" value={editCharacter.title} onChange={handleEditChange} placeholder="Title" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              성별 <input type="string" name="gender" value={editCharacter.gender} onChange={handleEditChange} placeholder="Gender" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              유닛 <input type="string" name="unit" value={editCharacter.unit} onChange={handleEditChange} placeholder="Unit" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              소속 <input type="text" name="party" value={editCharacter.party} onChange={handleEditChange} placeholder="Party" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              성향 <input type="string" name="personality" value={editCharacter.personality} onChange={handleEditChange} placeholder="Personality" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              무기 <input type="text" name="weapon" value={editCharacter.weapon} onChange={handleEditChange} placeholder="Weapon" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              스킬 <input type="text" name="skill" value={editCharacter.skill} onChange={handleEditChange} placeholder="skill" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              취미 <input type="text" name="hobby" value={editCharacter.hobby} onChange={handleEditChange} placeholder="Hobby" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              특기 <input type="text" name="talent" value={editCharacter.talent} onChange={handleEditChange} placeholder="Talent" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              신체 <input type="text" name="body" value={editCharacter.body} onChange={handleEditChange} placeholder="Body" autocomplete="off" />
+            </div>
+            <div className="input-wrapper">
+              출신 <input type="text" name="country" value={editCharacter.country} onChange={handleEditChange} placeholder="Country" autocomplete="off" />
+            </div>
+
+              {/* 가족 관계 필드 */}
               <div className="input-wrapper">
-                출생 <input type="number" name="birth" value={editCharacter.birth} onChange={handleEditChange} placeholder="Birth" />
+                가족 관계 <input type="text" name="familyRelation" value={editCharacter.familyRelation} onChange={handleRelationEditChange} placeholder="Family Relation" autocomplete="off" />
+                {activeField === 'familyRelation' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('familyRelation', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 배우자 필드 */}
               <div className="input-wrapper">
-                이름 <input type="text" name="name" value={editCharacter.name} onChange={handleEditChange} placeholder="Name" />
+                배우자 <input type="text" name="marriage" value={editCharacter.marriage} onChange={handleRelationEditChange} placeholder="Marriage" autocomplete="off" />
+                {activeField === 'marriage' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('marriage', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 부모 필드 */}
               <div className="input-wrapper">
-                성 <input type="text" name="family" value={editCharacter.family} onChange={handleEditChange} placeholder="Family" />
+                부모 <input type="text" name="parent" value={editCharacter.parent} onChange={handleRelationEditChange} placeholder="Parent" autocomplete="off" />
+                {activeField === 'parent' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('parent', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 자식 필드 */}
               <div className="input-wrapper">
-                칭호 <input type="text" name="title" value={editCharacter.title} onChange={handleEditChange} placeholder="Title" />
+                자식 <input type="text" name="child" value={editCharacter.child} onChange={handleRelationEditChange} placeholder="Child" autocomplete="off" />
+                {activeField === 'child' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('child', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 형제 필드 */}
               <div className="input-wrapper">
-                성별 <input type="string" name="gender" value={editCharacter.gender} onChange={handleEditChange} placeholder="Gender" />
+                형제 <input type="text" name="brother" value={editCharacter.brother} onChange={handleRelationEditChange} placeholder="Brother" autocomplete="off" />
+                {activeField === 'brother' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('brother', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 우호 관계 필드 */}
               <div className="input-wrapper">
-                유닛 <input type="string" name="unit" value={editCharacter.unit} onChange={handleEditChange} placeholder="Unit" />
+                우호 관계 <input type="text" name="goodship" value={editCharacter.goodship} onChange={handleRelationEditChange} placeholder="Goodship" autocomplete="off" />
+                {activeField === 'goodship' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('goodship', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* 적대 관계 필드 */}
               <div className="input-wrapper">
-                소속 <input type="text" name="party" value={editCharacter.party} onChange={handleEditChange} placeholder="Party" />
+                적대 관계 <input type="text" name="badship" value={editCharacter.badship} onChange={handleRelationEditChange} placeholder="Badship" autocomplete="off" />
+                {activeField === 'badship' && searchResults.length > 0 && (
+                  <div className="search-results">
+                    {searchResults.map((result, index) => (
+                      <div key={index} onClick={() => selectSearchResult('badship', result)}>
+                        {result}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="input-wrapper">
-                성향 <input type="string" name="personality" value={editCharacter.personality} onChange={handleEditChange} placeholder="Personality" />
-              </div>
-              <div className="input-wrapper">
-                무기, 유파 <input type="text" name="weapon" value={editCharacter.weapon} onChange={handleEditChange} placeholder="Weapon" />
-              </div>
-              <div className="input-wrapper">
-                취미 <input type="text" name="hobby" value={editCharacter.hobby} onChange={handleEditChange} placeholder="Hobby" />
-              </div>
-              <div className="input-wrapper">
-                특기 <input type="text" name="talent" value={editCharacter.talent} onChange={handleEditChange} placeholder="Talent" />
-              </div>
-              <div className="input-wrapper">
-                신체 <input type="text" name="body" value={editCharacter.body} onChange={handleEditChange} placeholder="Body" />
-              </div>
-              <div className="input-wrapper">
-                출신 <input type="text" name="country" value={editCharacter.country} onChange={handleEditChange} placeholder="Country" />
-              </div>
-              <div className="input-wrapper">
-                가족 관계 <input type="text" name="familyRelation" value={editCharacter.familyRelation} onChange={handleEditChange} placeholder="Family Relation" />
-              </div>
-              <div className="input-wrapper">
-                배우자 <input type="text" name="marriage" value={editCharacter.marriage} onChange={handleEditChange} placeholder="marriage" />
-              </div>
-              <div className="input-wrapper">
-                부모 <input type="text" name="parent" value={editCharacter.parent} onChange={handleEditChange} placeholder="parent" />
-              </div>
-              <div className="input-wrapper">
-                자식 <input type="text" name="child" value={editCharacter.child} onChange={handleEditChange} placeholder="child" />
-              </div>
-              <div className="input-wrapper">
-                형제 <input type="text" name="brother" value={editCharacter.brother} onChange={handleEditChange} placeholder="brother" />
-              </div>
-              <div className="input-wrapper">
-                우호 관계 <input type="text" name="goodship" value={editCharacter.goodship} onChange={handleEditChange} placeholder="Goodship" />
-              </div>
-              <div className="input-wrapper">
-                적대 관계 <input type="text" name="badship" value={editCharacter.badship} onChange={handleEditChange} placeholder="Badship" />
-              </div>
+
               <textarea type="text" name="detail" value={editCharacter.detail} onChange={handleEditChange} placeholder="Detail" />
             </div>
             <button onClick={saveEdit}>저장</button>

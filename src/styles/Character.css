@@ -7,24 +7,19 @@
   position: relative;
 }
 
-.years {
-  font-size: 22px;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-.years input {
-  width: 60px;
-  font-size: 22px;
-}
-
 .search {
   font-size: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.search input:first-child {
+  width: 80px;
 }
 .search input {
-  width: 170px;
+  width: 180px;
   font-size: 20px;
+  margin-right: 30px;
 }
-
 
 .add-inputs {
   display: block;
@@ -93,7 +88,7 @@
   width: 90px;
 }
 .indexs .info.title {
-  width: 130px;
+  width: 120px;
 }
 .indexs .info.age {
   width: 50px;
@@ -113,14 +108,18 @@
 .indexs .info.weapon {
   width: 140px;
 }
+.indexs .info.skill {
+  width: 140px;
+}
 .indexs .info.hobby {
   width: 90px;
 }
 .indexs .info.talent {
   width: 90px;
 }
+
 .indexs .info.body {
-  width: 120px;
+  width: 130px;
 }
 .indexs .info.country {
   width: 150px;

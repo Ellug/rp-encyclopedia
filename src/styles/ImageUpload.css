@@ -1,0 +1,39 @@
+.profile-container {
+  position: absolute;
+  top: 50px;
+  right: 120px;
+  width: 500px;
+  height: 600px;
+}
+.profile-container input {
+  background-color: transparent;
+}
+
+.profile-img img {
+  width: 500px;
+  height: 600px;
+}
+.profile-img .img-container {
+  width: 500px;
+  height: 600px;
+}
+.profile-img img {
+  max-width: 500px;
+  width: auto;
+  height: auto;
+}
+
+.profile-container button {
+  border: none;
+  color: rgba(0, 0, 0, 0.5);
+  width: auto;
+  height: auto;
+  background-color: transparent;
+}
+.profile-container button:hover {
+  color: rgba(148, 148, 148, 0.8);
+  border: none;
+  width: auto;
+  height: auto;
+  background-color: transparent;
+}
