@@ -1,0 +1,170 @@
+.char-comp {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.search {
+  font-size: 20px;
+  margin-top: 10px;
+  margin-bottom: 35px;
+}
+.search input:first-child {
+  width: 80px;
+}
+.search input {
+  width: 180px;
+  font-size: 20px;
+  margin-right: 30px;
+}
+
+.add-inputs {
+  display: block;
+  width: 1400px;
+  margin: 10px auto;
+}
+
+.add-inputs .add-profile {
+  display: block;
+}
+
+.add-detail {
+  width: 90%;
+  min-height: 100px;
+}
+.add-detail:focus {
+  min-height: 500px;
+}
+
+.char-comp .indexs {
+  width: 100%;
+  height: 40px;
+}
+
+.indexs {
+  display: flex;
+  width: 100%;
+  text-align: start;
+  align-items: center;
+}
+.index-fixed {
+  display: flex;
+  position: absolute;
+  top: 21px;
+  left: 44px;
+  font-size: 14px;
+  width: 1800px;
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.indexs .infos {
+  display: flex;
+  flex-grow: 1;
+}
+.indexs .infos .profile {
+  display: flex;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+.indexs .info {
+  margin: auto 5px;
+  font-size: 13px;
+}
+.indexs .infos .profile {
+  width: 100%;
+}
+.info.birth {
+  width: 30px;
+  text-align: center;
+}
+.info.name {
+  width: 70px;
+  text-align: end;
+}
+.indexs .info.name:hover,
+.indexs .info.fam:hover,
+.indexs .info.party:hover {
+  color: yellow;
+  cursor: pointer;
+  transform: scale(1.05);
+  transition: .2s;
+}
+
+.info.fam {
+  width: 90px;
+}
+.info.title {
+  width: 120px;
+}
+.info.age {
+  width: 50px;
+}
+.info.gen {
+  width: 15px;
+}
+.info.unit {
+  width: 70px;
+}
+.info.party {
+  width: 130px;
+}
+.info.personality {
+  width: 40px;
+}
+.info.weapon {
+  width: 140px;
+}
+.info.skill {
+  width: 140px;
+}
+.info.hobby {
+  width: 90px;
+}
+.info.talent {
+  width: 90px;
+}
+
+.info.body {
+  width: 130px;
+}
+.info.country {
+  width: 150px;
+}
+
+.indexs .profile .detail {
+  width: 130px;
+}
+
+.char-comp button {
+  width: 130px;
+  height: 40px;
+  border: 1px solid black;
+  border-radius: 15px;
+  background-color: blanchedalmond;
+  font-size: 17px;
+  font-weight: 600;
+  margin: auto 2px;
+  transition: .2s;
+}
+.char-comp button:hover {
+  border: 1px solid blanchedalmond;
+  background-color: rgb(238, 162, 48);
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transition: none;
+}
+button:disabled:hover {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
