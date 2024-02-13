@@ -58,8 +58,8 @@ const Character = () => {
         const { detail, images, ...data } = doc.data();
         return { id: doc.id, ...data };
       });
-
       localStorage.setItem('characters', JSON.stringify(serverCharacterList));
+      console.log('local save')
     } catch (error) {
       console.error("Error loading data: ", error);
     } finally {
