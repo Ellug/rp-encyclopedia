@@ -1,6 +1,7 @@
 // src/pages/Character.jsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import app from '../firebaseConfig';
+// import app from '../firebaseConfig';
+import database from '../firebaseConfig';
 import { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import '../styles/Character.css';
 import DetailModal from '../components/DetailModal.jsx';
@@ -14,13 +15,15 @@ const Character = () => {
     marriage: '', brother: '', parent: '', child: '', Images: '',
   });
   const [editCharacter, setEditCharacter] = useState({});
-  const db = getFirestore(app);
+  const db = getFirestore(database);
   const [showModal, setShowModal] = useState(false);
   const [currentYear, setCurrentYear] = useState('52');
 
   const [selectedFamily, setSelectedFamily] = useState('');
   const [selectedParty, setSelectedParty] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [dataFetched, setDataFetched] = useState(false);
 
   // 모달 열기
   const openModal = useCallback(async (character) => {
@@ -46,6 +49,7 @@ const Character = () => {
   const fetchData = async () => {
     if (isLoading) return;
     setIsLoading(true);
+    localStorage.removeItem('characters');
     console.log('on load')
 
     try {
@@ -60,6 +64,7 @@ const Character = () => {
       console.error("Error loading data: ", error);
     } finally {
       setIsLoading(false);
+      setDataFetched(true);
       console.log('off load')
     }
   };
@@ -97,13 +102,15 @@ const Character = () => {
       });
       setCharacters(characterList);
     };
-  
+    
     const cachedData = localStorage.getItem('characters');
-    if (cachedData) {
+    if (cachedData && dataFetched) {
       const characterList = JSON.parse(cachedData);
       applyFiltersAndSorting(characterList);
+      setDataFetched(false)
+      console.log('list')
     }
-  }, [searchTerm, selectedFamily, selectedParty]); // 의존성 배열에 필터링 및 정렬 관련 변수들 포함
+  }, [searchTerm, selectedFamily, selectedParty, dataFetched]);
   
 
   const handleFamilyClick = useCallback((familyName) => {
@@ -307,7 +314,7 @@ const Character = () => {
             </div>
           </div>
         </div>
-        {isLoading ? <p>Loading characters... 너무 오래 걸리면 새로고침</p> : null}
+        {isLoading ? <p>Loading characters...</p> : null}
       <div style={{ height: '600px', width: '1800px', overflowY: 'scroll', margin: '10px auto', padding: '10px', border: '1px solid white', position: 'relative' }}>
         {characterListUI}
       </div>
