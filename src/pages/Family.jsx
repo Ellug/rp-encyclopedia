@@ -79,7 +79,7 @@ const Family = () => {
         placeholder="Family" autoComplete='off' />
       <button onClick={addFamily} disabled={!newFamily}>추가</button>
 
-      <h3>가문 목록</h3>
+      <h3>가문, 유파 계보</h3>
         <div className='fam-list'>
           {families.map((name) => (
             <div className='fams' key={name} onClick={() => handleFamilyClick(name)}>

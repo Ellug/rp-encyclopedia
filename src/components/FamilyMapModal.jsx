@@ -126,7 +126,6 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
     }
   };
   
-  
 
   return (
     <div className="family-map-modal-background" onClick={saveAndClose}>
