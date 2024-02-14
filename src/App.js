@@ -8,6 +8,7 @@ import Etc from './pages/ETC';
 import Map from './pages/Map';
 import Game from './pages/Game';
 import NavBar from './components/NavBar';
+import Family from './pages/Family';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Main />} />
             <Route path="/history" element={<History />} />
             <Route path="/character" element={<Character />} />
+            <Route path="/family" element={<Family />} />
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
             <Route path="/game" element={<Game />} />
