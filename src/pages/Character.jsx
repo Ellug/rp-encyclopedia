@@ -104,12 +104,11 @@ const Character = () => {
       setCharacters(characterList);
     };
     
+    // 캐시된 데이터를 항상 불러와서 적용
     const cachedData = localStorage.getItem('characters');
-    if (cachedData && dataFetched) {
+    if (cachedData) {
       const characterList = JSON.parse(cachedData);
       applyFiltersAndSorting(characterList);
-      setDataFetched(false)
-      console.log('list')
     }
   }, [searchTerm, selectedFamily, selectedParty, dataFetched]);
   

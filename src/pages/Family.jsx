@@ -13,6 +13,7 @@ const Family = () => {
 
   const [families, setFamilies] = useState([]); // 문서 이름들을 저장할 상태
   const [selectedFamilyData, setSelectedFamilyData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchFamilies = async () => {
     const querySnapshot = await getDocs(collection(db, "family"));
@@ -78,15 +79,35 @@ const Family = () => {
       <input type="text" name="newFamily" value={newFamily} onChange={handleNewFamilyChange}
         placeholder="Family" autoComplete='off' />
       <button onClick={addFamily} disabled={!newFamily}>추가</button>
-
+      <div className="search-container">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="가문 검색..."
+          autoComplete="off"
+        />
+      </div>
       <h3>가문, 유파 계보</h3>
-        <div className='fam-list'>
-          {families.map((name) => (
-            <div className='fams' key={name} onClick={() => handleFamilyClick(name)}>
-              {name}
-            </div> // 문서 이름(가문명)을 리스트로 표시
-          ))}
-        </div>
+
+      <div className='fam-list'>
+        {families
+          .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()))
+          .map((name) => {
+            // 검색어와 일치하는 부분을 강조
+            const parts = name.split(new RegExp(`(${searchTerm})`, 'gi'));
+            return (
+              <div className='fams' key={name} onClick={() => handleFamilyClick(name)}>
+                {parts.map((part, index) => 
+                  part.toLowerCase() === searchTerm.toLowerCase() ? 
+                    <span key={index}>{part}</span> : 
+                    part
+                )}
+              </div>
+            );
+          })}
+      </div>
+
       
       {showFamilyMap &&
         <FamilyMapModal
