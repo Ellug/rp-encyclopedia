@@ -16,12 +16,11 @@
   background-color: transparent;
   border: 2px solid #ffffff;
   border-radius: 10px;
-  transform: translateX(250px);
+  transform: translateX(250px) translateY(-10px);
 }
 .custom-file-upload:hover {
   border-color: gold;
   color: gold;
-  transform: scale(.95);
   transition: .2s;
 }
 
