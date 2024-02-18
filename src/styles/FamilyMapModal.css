@@ -41,7 +41,8 @@
 
 .zoom {
   position: absolute;
-  left: 15%;
+  left: 1%;
+  top: 11%;
 }
 .zoom button {
   width: 60px;
