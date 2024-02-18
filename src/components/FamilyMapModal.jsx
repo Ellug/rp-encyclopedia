@@ -37,6 +37,7 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
   };
 
   const startDrag = (box) => (e) => {
+    e.stopPropagation();
     setIsDragging(true);
     setDraggedBox({...box, offsetX: e.clientX - e.target.offsetLeft, offsetY: e.clientY - e.target.offsetTop});
   };
@@ -178,16 +179,19 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
 
   // 마우스 드래그 시작 처리
   const handleMouseDown = (e) => {
-    setDragging(true);
-    setStartPos({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
+    // e.target이 박스가 아닌 경우에만 dragging 상태를 true로 설정
+    if (!e.target.classList.contains('fam-member')) {
+        setDragging(true);
+        setStartPos({
+            x: e.clientX - position.x,
+            y: e.clientY - position.y,
+        });
+    }
+};
 
   // 마우스 이동 처리
   const handleMouseMove = (e) => {
-    if (dragging) {
+    if (!isDragging && dragging) {
       setPosition({
         x: e.clientX - startPos.x,
         y: e.clientY - startPos.y,
