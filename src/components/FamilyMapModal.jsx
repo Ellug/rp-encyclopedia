@@ -28,7 +28,6 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
       alert('Please enter the name of the family member.');
       return;
     }
-
     const newBox = { name, x: 100, y: 100 };
     const docRef = doc(collection(db, `family/${familyData.id}/familyMember`)); // Firestore에서 자동 생성된 ID 사용
     await setDoc(docRef, newBox);
@@ -139,13 +138,23 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
 
   // 마우스 휠 이벤트 핸들러
   const handleWheel = (e) => {
-    if (e.deltaY < 0) {
-      // 휠을 위로 스크롤 (줌인)
-      setScale(prevScale => Math.min(prevScale * 1.1, 4)); // 최대 4배까지 확대 가능
-    } else if (e.deltaY > 0) {
-      // 휠을 아래로 스크롤 (줌아웃)
-      setScale(prevScale => Math.max(prevScale / 1.1, 0.25)); // 최소 0.25배까지 축소 가능
-    }
+    const bounds = e.target.getBoundingClientRect();
+    const mouseX = e.clientX - bounds.left; // 마우스 위치 X (컨테이너 내부 기준)
+    const mouseY = e.clientY - bounds.top; // 마우스 위치 Y (컨테이너 내부 기준)
+    const scaleChange = e.deltaY < 0 ? 1.1 : 0.9; // 확대 또는 축소
+  
+    // 확대/축소에 따른 새로운 스케일 계산
+    const newScale = Math.min(Math.max(scale * scaleChange, 0.25), 4);
+  
+    // 확대/축소 시 마우스 위치를 기준으로 position 조정
+    const scaleRatio = newScale / scale; // 스케일 변화 비율
+    const newPosition = {
+      x: position.x * scaleRatio + (mouseX * (1 - scaleRatio)),
+      y: position.y * scaleRatio + (mouseY * (1 - scaleRatio)),
+    };
+  
+    setScale(newScale);
+    setPosition(newPosition);
   };
 
    // 방향키로 이동하는 함수
@@ -170,7 +179,6 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
-    
     // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -187,8 +195,7 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
             y: e.clientY - position.y,
         });
     }
-};
-
+  };
   // 마우스 이동 처리
   const handleMouseMove = (e) => {
     if (!isDragging && dragging) {
@@ -198,7 +205,6 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
       });
     }
   };
-
   // 마우스 드래그 끝 처리
   const handleMouseUp = () => {
     setDragging(false);
@@ -214,18 +220,25 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
         onMouseLeave={endDrag}
       >
         <h1>{familyData.id}</h1>
-        
-        <button onClick={zoomIn}>확대</button>
-        <button onClick={zoomOut}>축소</button>
+        <div className='zoom'>
+          <button onClick={zoomIn}>확대</button>
+          <button onClick={zoomOut}>축소</button>
+        </div>
+
         <div className="map-close" onClick={saveAndClose}>&times;</div>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="구성원 이름 입력"
-        />
-        <button onClick={addBox}>추가</button>
-        <button onClick={deleteFamily}>가문 삭제</button>
+
+        <div className='fam-add'>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="구성원 이름 입력"
+          />
+          <button onClick={addBox}>추가</button>
+          <button onClick={deleteFamily}>가문 삭제</button>
+        </div>
+
+
         <div 
           style={{
             overflow: 'hidden',
