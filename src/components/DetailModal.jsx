@@ -225,9 +225,9 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   const [showFamilyMap, setShowFamilyMap] = useState(false);
 
   // 가계도 모달 열기
-  const openFamilyMap = () => {
-    setShowFamilyMap(true);
-  };
+  // const openFamilyMap = () => {
+  //   setShowFamilyMap(true);
+  // };
 
   // 관계 인풋창 입력어 추천 로직
   // 일반화된 입력 필드 변경 이벤트 핸들러
@@ -287,10 +287,27 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     setSearchText(''); // 검색 텍스트 초기화
   };
 
+  // 모달 배경 클릭 핸들러
+  const handleModalBackgroundClick = (e) => {
+    // 수정 모드일 때 사용자에게 경고
+    if (isEditing) {
+      // 사용자에게 변경 사항을 저장하지 않고 닫을 것인지 확인
+      const confirmClose = window.confirm("진짜로 닫을 거냐 어리석은 자여?");
+      if (confirmClose) {
+        // 사용자가 확인한 경우에만 모달 닫기
+        setIsEditing(false); // 선택적으로 편집 모드를 종료할 수 있습니다.
+        onClose(); // 모달 닫기 함수 호출
+      }
+    } else {
+      // 편집 모드가 아닌 경우에는 바로 닫기
+      onClose();
+    }
+  };
+
 
 
   return (
-    <div className="modal-background" onClick={onClose}>
+    <div className="modal-background" onClick={handleModalBackgroundClick}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <span className="close" onClick={onClose}>&times;</span>
 
@@ -411,7 +428,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
             </div>
             <div className='info-detail' dangerouslySetInnerHTML={createMarkup(character.detail)}></div>
             <div className='btn-container'>
-              <button onClick={openFamilyMap}>가계도 보기</button>
+              {/* <button onClick={openFamilyMap}>가계도 보기</button> */}
               {showFamilyMap && <FamilyMapModal character={character} onClose={() => setShowFamilyMap(false)} />}
               <button onClick={() => setIsEditing(true)}>수정</button>
               <button onClick={confirmDeletion}>삭제</button>

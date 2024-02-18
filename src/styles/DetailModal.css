@@ -16,11 +16,12 @@
   background-color: rgb(7, 6, 12);
   padding: 70px 150px;
   border: 1px solid #888;
-  width: 75%;
-  height: 65%;
+  width: 85%;
+  height: 95%;
   position: relative;
   overflow-y: scroll;
   z-index: 1012;
+  box-sizing: border-box;
 }
 
 .close {

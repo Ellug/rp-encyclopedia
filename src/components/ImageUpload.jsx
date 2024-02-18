@@ -48,8 +48,8 @@ const ImageUpload = ({ character, editCharacter }) => {
   
   const handleImageChange = async (event) => {
     if (event.target.files && event.target.files[0]) {
-      if (images.length >= 2) {
-        alert('최대 2개의 이미지만 업로드할 수 있습니다.');
+      if (images.length >= 3) {
+        alert('최대 3개의 이미지만 업로드할 수 있습니다.');
         return;
       }
   
