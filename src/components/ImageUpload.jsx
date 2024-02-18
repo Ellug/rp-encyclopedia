@@ -47,44 +47,49 @@ const ImageUpload = ({ character, editCharacter }) => {
   };
   
   const handleImageChange = async (event) => {
-    if (event.target.files && event.target.files[0]) {
-      if (images.length >= 3) {
-        alert('최대 3개의 이미지만 업로드할 수 있습니다.');
-        return;
-      }
+    const files = event.target.files;
+    if (files.length + images.length > 3) {
+      alert('최대 3개의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
   
-      const file = event.target.files[0];
+    const resizePromises = Array.from(files).map(file =>
+      new Promise(resolve => {
+        resizeImage(file, 800, 600, (blob) => {
+          const resizedFile = new File([blob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          });
   
-      resizeImage(file, 800, 600, async (blob) => {
-        const resizedFile = new File([blob], file.name, {
-          type: 'image/jpeg',
-          lastModified: Date.now()
-        });
-  
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const newImages = [...images, reader.result];
-          setImages(newImages);
-    
-          // Firestore에 저장할 데이터 업데이트
-          const updatedData = {
-            ...editCharacter,
-            images: newImages
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result); // 리사이즈된 이미지의 data URL 반환
           };
-    
-          // Firestore에 즉시 저장
-          try {
-            const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
-            const newDocRef = doc(db, "char", newDocId);
-            await setDoc(newDocRef, updatedData);
-          } catch (error) {
-            console.error("Error saving image to Firestore: ", error);
-          }
-        };
-        reader.readAsDataURL(resizedFile);
-      });
+          reader.readAsDataURL(resizedFile);
+        });
+      })
+    );
+  
+    try {
+      const newImagesDataUrls = await Promise.all(resizePromises);
+      const newImages = [...images, ...newImagesDataUrls];
+      setImages(newImages);
+  
+      // Firestore에 저장할 데이터 업데이트
+      const updatedData = {
+        ...editCharacter,
+        images: newImages
+      };
+  
+      // Firestore에 즉시 저장
+      const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
+      const newDocRef = doc(db, "char", newDocId);
+      await setDoc(newDocRef, updatedData);
+    } catch (error) {
+      console.error("Error processing images: ", error);
     }
   };
+  
 
   // 이미지 삭제 함수
   const deleteImage = async (index) => {
@@ -112,7 +117,12 @@ const ImageUpload = ({ character, editCharacter }) => {
 
   return (
     <div className='profile-container'>
-      <input type="file" onChange={handleImageChange} accept="image/*" />
+      <div className='upload-btn-wrapper'>
+        <label htmlFor="file-upload" className="custom-file-upload">
+          이미지 업로드
+        </label>
+        <input id="file-upload" type="file" onChange={handleImageChange} accept="image/*" multiple style={{display: 'none'}} />
+      </div>
 
       <Swiper
         modules={[Navigation, Pagination, A11y]}
