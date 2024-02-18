@@ -75,7 +75,7 @@ const Character = () => {
   
     try {
       const querySnapshot = await getDocs(collection(db, "char"));
-      const serverCharacterList = querySnapshot.docs.map(doc => ({
+      let serverCharacterList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
@@ -85,25 +85,33 @@ const Character = () => {
       const localCharacterList = localDataRaw ? JSON.parse(localDataRaw) : [];
   
       // 서버 데이터와 로컬 데이터 비교
-      const updatedLocalData = serverCharacterList.filter(serverChar => {
+      const isDataUpdated = serverCharacterList.some(serverChar => {
         const localChar = localCharacterList.find(localChar => localChar.id === serverChar.id);
-        // 로컬에 없거나 데이터가 다른 경우 true 반환 (업데이트 필요)
+        // 로컬에 없거나 데이터가 다른 경우 업데이트 필요
         return !localChar || JSON.stringify(localChar) !== JSON.stringify(serverChar);
       });
   
-      if (updatedLocalData.length > 0) {
-        // 로컬 데이터 업데이트 (서버 데이터로 교체)
+      if (isDataUpdated || !localDataRaw) {
+        // 변경된 데이터로 로컬 스토리지 업데이트
         localStorage.setItem('characters', JSON.stringify(serverCharacterList));
-        console.log('Local storage updated with server data');
+      } else {
+        // 변경사항이 없다면 서버 데이터 대신 로컬 데이터 사용
+        serverCharacterList = localCharacterList;
       }
+  
+      // 생일순으로 정렬하기 전에 데이터가 최신인지 확인
+      serverCharacterList.sort((a, b) => a.birth.localeCompare(b.birth));
+  
+      // UI 업데이트를 위한 상태 설정
+      setCharacters(serverCharacterList);
     } catch (error) {
       console.error("Error loading data: ", error);
     } finally {
       setIsLoading(false);
       setDataFetched(true);
-      console.log('Data loading complete');
     }
   };
+  
   
 
   useEffect(() => {  
