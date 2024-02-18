@@ -21,10 +21,17 @@
   width: 95%;
   height: 85%;
   position: relative;
-  overflow-y: scroll;
+  overflow-y: hidden;
   z-index: 1033;
   user-select: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
+.family-map-modal-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+
 .family-map-modal-content h1 {
   position: absolute;
   border: 2px solid white;

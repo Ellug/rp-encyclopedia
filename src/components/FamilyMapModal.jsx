@@ -127,6 +127,81 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
   };
   
 
+  const [scale, setScale] = useState(1); // 확대/축소를 위한 상태
+  const [position, setPosition] = useState({ x: 0, y: 0 }); // 이동을 위한 상태
+  const [dragging, setDragging] = useState(false); // 드래그 상태
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 }); // 드래그 시작 위치
+
+  // 확대/축소 함수
+  const zoomIn = () => setScale(scale * 1.1);
+  const zoomOut = () => setScale(scale * 0.9);
+
+  // 마우스 휠 이벤트 핸들러
+  const handleWheel = (e) => {
+    if (e.deltaY < 0) {
+      // 휠을 위로 스크롤 (줌인)
+      setScale(prevScale => Math.min(prevScale * 1.1, 4)); // 최대 4배까지 확대 가능
+    } else if (e.deltaY > 0) {
+      // 휠을 아래로 스크롤 (줌아웃)
+      setScale(prevScale => Math.max(prevScale / 1.1, 0.25)); // 최소 0.25배까지 축소 가능
+    }
+  };
+
+   // 방향키로 이동하는 함수
+   const handleKeyDown = (e) => {
+    switch (e.key) {
+      case "ArrowUp":
+        setPosition(prev => ({ ...prev, y: prev.y + 20 }));
+        break;
+      case "ArrowDown":
+        setPosition(prev => ({ ...prev, y: prev.y - 20 }));
+        break;
+      case "ArrowLeft":
+        setPosition(prev => ({ ...prev, x: prev.x + 20 }));
+        break;
+      case "ArrowRight":
+        setPosition(prev => ({ ...prev, x: prev.x - 20 }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // 마우스 드래그 시작 처리
+  const handleMouseDown = (e) => {
+    setDragging(true);
+    setStartPos({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  // 마우스 이동 처리
+  const handleMouseMove = (e) => {
+    if (dragging) {
+      setPosition({
+        x: e.clientX - startPos.x,
+        y: e.clientY - startPos.y,
+      });
+    }
+  };
+
+  // 마우스 드래그 끝 처리
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+
+
+
   return (
     <div className="family-map-modal-background" onClick={saveAndClose}>
       <div className="family-map-modal-content" onClick={e => e.stopPropagation()}
@@ -135,6 +210,9 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
         onMouseLeave={endDrag}
       >
         <h1>{familyData.id}</h1>
+        
+        <button onClick={zoomIn}>확대</button>
+        <button onClick={zoomOut}>축소</button>
         <div className="map-close" onClick={saveAndClose}>&times;</div>
         <input
           type="text"
@@ -144,27 +222,53 @@ const FamilyMapModal = ({ onClose, familyData, db, fetchFamilies }) => {
         />
         <button onClick={addBox}>추가</button>
         <button onClick={deleteFamily}>가문 삭제</button>
-        {boxes.map((box, index) => (
-          <div className='fam-member' key={index} 
-          onMouseDown={startDrag(box)}
-          style={{ 
-            position: 'absolute', 
-            left: box.id === draggedBox?.id ? draggedBox.x : box.x, 
-            top: box.id === draggedBox?.id ? draggedBox.y : box.y, 
-            cursor: 'move', 
+        <div 
+          style={{
+            overflow: 'hidden',
+            width: '100%', // 외부 컨테이너의 크기 조정
+            height: '100%', // 외부 컨테이너의 크기 조정
           }}
-          >
-            {box.name}
-            <button className='delete-char'
-            onClick={(e) => {
-              e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
-              deleteCharacter(box.id);
+          onWheel={handleWheel} // 마우스 휠 이벤트에 핸들러 연결
+          onMouseDown={handleMouseDown} // 드래그 시작
+          onMouseMove={handleMouseMove} // 마우스 이동
+          onMouseUp={handleMouseUp} // 드래그 끝
+          onMouseLeave={handleMouseUp} // 마우스가 컨테이너 밖으로 나갔을 때도 드래그 종료 처리
+        >
+          <div
+            style={{
+              transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+              transformOrigin: '0 0',
+              transition: 'transform 0.2s',
             }}
           >
-            X
-          </button>
+
+            {/* 가계도 및 기타 컴포넌트 */}
+            {boxes.map((box, index) => (
+              <div className='fam-member' key={index} 
+              onMouseDown={startDrag(box)}
+              style={{ 
+                position: 'absolute', 
+                left: box.id === draggedBox?.id ? draggedBox.x : box.x, 
+                top: box.id === draggedBox?.id ? draggedBox.y : box.y, 
+                cursor: 'move', 
+              }}
+              >
+                {box.name}
+                <button className='delete-char'
+                onClick={(e) => {
+                  e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
+                  deleteCharacter(box.id);
+                }}
+              >
+                X
+              </button>
+              </div>
+            ))}
+
+
           </div>
-        ))}
+        </div>
+
       </div>
     </div>
   );
