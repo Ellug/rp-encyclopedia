@@ -46,28 +46,65 @@ const Character = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   
+  // const fetchData = async () => {
+  //   if (isLoading) return;
+  //   setIsLoading(true);
+  //   localStorage.removeItem('characters');
+  //   console.log('on load')
+
+  //   try {
+  //     const querySnapshot = await getDocs(collection(db, "char"));
+  //     const serverCharacterList = querySnapshot.docs.map(doc => {
+  //       const { detail, images, ...data } = doc.data();
+  //       return { id: doc.id, ...data };
+  //     });
+  //     localStorage.setItem('characters', JSON.stringify(serverCharacterList));
+  //     console.log('local save')
+  //   } catch (error) {
+  //     console.error("Error loading data: ", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //     setDataFetched(true);
+  //     console.log('off load')
+  //   }
+  // };
+
   const fetchData = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    localStorage.removeItem('characters');
-    console.log('on load')
-
+  
     try {
       const querySnapshot = await getDocs(collection(db, "char"));
-      const serverCharacterList = querySnapshot.docs.map(doc => {
-        const { detail, images, ...data } = doc.data();
-        return { id: doc.id, ...data };
+      const serverCharacterList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      // 로컬 스토리지에서 캐릭터 데이터 가져오기
+      const localDataRaw = localStorage.getItem('characters');
+      const localCharacterList = localDataRaw ? JSON.parse(localDataRaw) : [];
+  
+      // 서버 데이터와 로컬 데이터 비교
+      const updatedLocalData = serverCharacterList.filter(serverChar => {
+        const localChar = localCharacterList.find(localChar => localChar.id === serverChar.id);
+        // 로컬에 없거나 데이터가 다른 경우 true 반환 (업데이트 필요)
+        return !localChar || JSON.stringify(localChar) !== JSON.stringify(serverChar);
       });
-      localStorage.setItem('characters', JSON.stringify(serverCharacterList));
-      console.log('local save')
+  
+      if (updatedLocalData.length > 0) {
+        // 로컬 데이터 업데이트 (서버 데이터로 교체)
+        localStorage.setItem('characters', JSON.stringify(serverCharacterList));
+        console.log('Local storage updated with server data');
+      }
     } catch (error) {
       console.error("Error loading data: ", error);
     } finally {
       setIsLoading(false);
       setDataFetched(true);
-      console.log('off load')
+      console.log('Data loading complete');
     }
   };
+  
 
   useEffect(() => {  
     fetchData();

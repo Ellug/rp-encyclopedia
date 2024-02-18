@@ -16,6 +16,7 @@
   background-color: transparent;
   border: 2px solid #ffffff;
   border-radius: 10px;
+  transform: translateX(250px);
 }
 .custom-file-upload:hover {
   border-color: gold;
