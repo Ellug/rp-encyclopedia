@@ -1,7 +1,7 @@
 // src/pages/Character.jsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 // import app from '../firebaseConfig';
-import database from '../firebaseConfig';
+import database from '../firebaseConfig.js';
 import { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import '../styles/Character.css';
 import DetailModal from '../components/DetailModal.jsx';
@@ -28,7 +28,7 @@ const Character = () => {
   // 모달 열기
   const openModal = useCallback(async (character) => {
     // 서버에서 캐릭터 데이터 가져오기
-    const docRef = doc(db, "char", character.id);
+    const docRef = doc(db, "char2", character.id);
     const docSnap = await getDoc(docRef);
   
     if (docSnap.exists()) {
@@ -74,7 +74,7 @@ const Character = () => {
     setIsLoading(true);
   
     try {
-      const querySnapshot = await getDocs(collection(db, "char"));
+      const querySnapshot = await getDocs(collection(db, "char2"));
       let serverCharacterList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -205,7 +205,7 @@ const Character = () => {
     
     const docId = `${newCharacter.name} ${newCharacter.family}`
     try {
-      await setDoc(doc(db, "char", docId), newCharacter);
+      await setDoc(doc(db, "char2", docId), newCharacter);
       setNewCharacter({ 
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
         weapon: '', skill: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '',
@@ -224,7 +224,7 @@ const Character = () => {
     }
   
     try {
-      await deleteDoc(doc(db, "char", id));
+      await deleteDoc(doc(db, "char2", id));
     } catch (error) {
       console.error("Error deleting document: ", error);
     } finally {
@@ -396,7 +396,7 @@ const Character = () => {
           openModal={openModal}
           characters={characters}
           onUpdate={updateCharactersState}
-          curcollection='char'
+          curcollection='char2'
         />
       ) : null}
 

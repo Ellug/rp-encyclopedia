@@ -8,7 +8,7 @@ import 'swiper/css/navigation'; // 네비게이션 스타일
 import 'swiper/css/pagination'; // 페이지네이션 스타일
 import { Navigation, Pagination, A11y } from 'swiper';
 
-const ImageUpload = ({ character, editCharacter }) => {
+const ImageUpload = ({ character, editCharacter, curcollection }) => {
   const [images, setImages] = useState(character.images || []);
   const db = getFirestore();
 
@@ -83,7 +83,7 @@ const ImageUpload = ({ character, editCharacter }) => {
   
       // Firestore에 즉시 저장
       const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
-      const newDocRef = doc(db, "char", newDocId);
+      const newDocRef = doc(db, curcollection, newDocId);
       await setDoc(newDocRef, updatedData);
     } catch (error) {
       console.error("Error processing images: ", error);
@@ -104,7 +104,7 @@ const ImageUpload = ({ character, editCharacter }) => {
         images: newImages
       };
       const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
-      const newDocRef = doc(db, "char", newDocId);
+      const newDocRef = doc(db, curcollection, newDocId);
   
       try {
         await setDoc(newDocRef, updatedData);

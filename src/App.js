@@ -9,6 +9,7 @@ import Map from './pages/Map';
 import Game from './pages/Game';
 import NavBar from './components/NavBar';
 import Family from './pages/Family';
+import New from './pages/New'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/history" element={<History />} />
             <Route path="/character" element={<Character />} />
             <Route path="/family" element={<Family />} />
+            <Route path="/new" element={<New />} />
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
             <Route path="/game" element={<Game />} />

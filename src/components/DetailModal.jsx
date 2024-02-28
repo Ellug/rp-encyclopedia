@@ -6,7 +6,7 @@ import '../styles/DetailModal.css';
 import FamilyMapModal from './FamilyMapModal';
 import ImageUpload from './ImageUpload';
 
-const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, characters, onUpdate }) => {
+const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, characters, onUpdate, curcollection }) => {
   const [isEditing, setIsEditing] = useState(false);
   const db = getFirestore();
   const originalDocId = `${character.name} ${character.family}`;
@@ -43,7 +43,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
 
   const saveEdit = async () => {
     const newDocId = editCharacter.family ? `${editCharacter.name} ${editCharacter.family}` : editCharacter.name;
-    const newDocRef = doc(db, "char", newDocId);
+    const newDocRef = doc(db, curcollection, newDocId);
     const updatedData = {
       ...editCharacter,
       images: images // 이미지 정보 포함
@@ -55,7 +55,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
   
       // 기존 문서 식별자와 새 문서 식별자가 다르면 기존 문서 삭제
       if (originalDocId !== newDocId) {
-        const originalDocRef = doc(db, "char", originalDocId);
+        const originalDocRef = doc(db, curcollection, originalDocId);
         await deleteDoc(originalDocRef);
       }
       // 관련 캐릭터의 정보 업데이트
@@ -187,13 +187,13 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
 
     // 관련 캐릭터의 문서 참조를 얻기 위한 함수
     const getRelatedDocRef = async (name) => {
-      let docRef = doc(db, "char", name);
+      let docRef = doc(db, curcollection, name);
       let docSnap = await getDoc(docRef);
 
       if (!docSnap.exists() && name.includes(" ")) {
         // 이름에 공백이 있는 경우 (예: 'John Doe'), 이름만으로 다시 시도
         const nameOnly = name.split(" ")[0];
-        docRef = doc(db, "char", nameOnly);
+        docRef = doc(db, curcollection, nameOnly);
         docSnap = await getDoc(docRef);
       }
 
@@ -316,7 +316,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
           <>
             <div className='detail-profile'>
               <ImageUpload character={character} editCharacter={editCharacter}
-              setImages={setImages} images={images} />
+              setImages={setImages} images={images} curcollection={curcollection} />
 
               <div className='info-title'>{character.title}</div>
               <div className='info-name'>{character.name} {character.family}</div>
