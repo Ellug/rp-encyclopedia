@@ -23,7 +23,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
     const fields = 
       ['birth', 'name', 'family', 'title', 'gender', 'unit', 'party', 'personality', 'weapon', 'skill',
       'hobby', 'talent', 'body', 'country', 'familyRelation', 'goodship', 'badship', 'detail',
-      'marriage', 'parent', 'child', 'brother', 'Images'];
+      'marriage', 'parent', 'child', 'brother', 'Images', 'voice'];
     const defaultCharacter = {};
     fields.forEach(field => {
       defaultCharacter[field] = characterData[field] || ''; // 존재하지 않는 필드는 빈 문자열로 설정
@@ -332,6 +332,7 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
               <div className='info-talent'>특기 : {character.talent}</div>
               <div className='info-body'>신체 사이즈 : {character.body}</div>
               <div className='info-country'>출신 : {character.country}</div>
+              <div className='info-voice'>성우 : {character.voice}</div>
               <br/>
               <div className='info familyRelation'>
                 가족 관계 : 
@@ -479,6 +480,9 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, charact
             </div>
             <div className="input-wrapper">
               출신 <input type="text" name="country" value={editCharacter.country} onChange={handleEditChange} placeholder="Country" autoComplete="off" />
+            </div>
+            <div className="input-wrapper">
+              성우 <input type="text" name="voice" value={editCharacter.voice} onChange={handleEditChange} placeholder="Voice" autoComplete="off" />
             </div>
 
               {/* 가족 관계 필드 */}

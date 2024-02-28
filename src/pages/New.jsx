@@ -12,7 +12,7 @@ const Character = () => {
   const [newCharacter, setNewCharacter] = useState({
     birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
     weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '', goodship: '', badship: '',
-    marriage: '', brother: '', parent: '', child: '', Images: '',
+    marriage: '', brother: '', parent: '', child: '', Images: '', voice: '',
   });
   const [editCharacter, setEditCharacter] = useState({});
   const db = getFirestore(database);
@@ -209,7 +209,7 @@ const Character = () => {
       setNewCharacter({ 
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
         weapon: '', skill: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '',
-        marriage: '', parent: '', child: '', brother: '', Images: '' });
+        marriage: '', parent: '', child: '', brother: '', Images: '', voice: '', });
     } catch (error) {
       console.error("Error adding document: ", error);
     } finally {
@@ -320,6 +320,10 @@ const Character = () => {
             <div className='info country'>
               <span dangerouslySetInnerHTML={{ __html: highlightText(character.country?.substring(0, 8), searchTerm) }}></span>{character.country?.length > 8 ? '...' : ''}
             </div>
+            {/* voice 필드 */}
+            <div className='info voice'>
+              <span dangerouslySetInnerHTML={{ __html: highlightText(character.voice?.substring(0, 10), searchTerm) }}></span>{character.voice?.length > 10 ? '...' : ''}
+            </div>
           </div>
         </div>
       </div>
@@ -355,6 +359,7 @@ const Character = () => {
                 <div className='info talent'>특기</div>
                 <div className='info body'>신체</div>
                 <div className='info country'>출신</div>
+                <div className='info voice'>성우</div>
               </div>
             </div>
           </div>
