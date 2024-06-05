@@ -1,0 +1,98 @@
+.characters {
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+.characters .comBTN{
+  width: 150px;
+  height: 46px;
+  font-size: 18px;
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  border-radius: 15px;
+}
+.characters .comBTN:hover{
+  border: 1px solid gold;
+  color: gold;
+  border-radius: 15px;
+}
+.characters .comBTN:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transition: none;
+}
+.characters .comBTN:disabled:hover {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.characters .search {
+  margin-top: 50px;
+
+}
+.characters .ListTable {
+  margin: 0 auto;
+  max-width: 1800px;
+  width: 90%;
+  height: 1000px;
+  overflow-y: scroll;
+}
+
+.character-table {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: #fff;
+}
+
+.character-table th,
+.character-table td {
+  padding: 7px;
+  text-align: left;
+  white-space: nowrap;
+}
+.character-table th:first-child,
+.character-table td:first-child {
+  width: 50px;
+}
+.character-table th {
+  background-color: #444;
+}
+.character-table tr {
+  border-bottom: 2px solid #fff;
+}
+.character-table td {
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+}
+.character-table td:last-child {
+  border-right: none;
+}
+
+.character-table .tableline:hover {
+  background-color: #222;
+  color: gold;
+  cursor: pointer;
+}
+
+
+.characters .add-inputs {
+  width: 100%;
+  max-width: 800px;
+}
+.characters .add-inputs input {
+  width: 40%;
+  height: 40px;
+}
+
+
+@media (max-width: 768px) {
+  .character-table th:nth-child(n+5),
+  .character-table td:nth-child(n+5) {
+    display: none;
+  }
+}

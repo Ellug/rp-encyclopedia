@@ -1,196 +1,98 @@
-// src/pages/Character.jsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-// import app from '../firebaseConfig';
 import database from '../firebaseConfig.js';
-import { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
-import '../styles/Character.css';
-import DetailModal from '../components/DetailModal.jsx';
+import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from 'firebase/firestore';
+import '../styles/Characters.css';
+import NewDetailModal from '../components/NewDetailModal.jsx'
 import Spinner from '../components/Spinner.jsx'
 
 const Character = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [characters, setCharacters] = useState([]);
   const [newCharacter, setNewCharacter] = useState({
     birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-    weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '', goodship: '', badship: '',
-    marriage: '', brother: '', parent: '', child: '', Images: '', voice: '',
+    weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '',
+    marriage: '', brother: '', parent: '', child: '', Images: '', voice: '', series: '',
   });
-  const [editCharacter, setEditCharacter] = useState({});
   const db = getFirestore(database);
   const [showModal, setShowModal] = useState(false);
   const [currentYear, setCurrentYear] = useState('52');
-
-  const [selectedFamily, setSelectedFamily] = useState('');
-  const [selectedParty, setSelectedParty] = useState('');
+  const [currentCharacter, setCurrentCharacter] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const [dataFetched, setDataFetched] = useState(false);
-
-  // 모달 열기
-  const openModal = useCallback(async (character) => {
-    // 서버에서 캐릭터 데이터 가져오기
-    const docRef = doc(db, "char2", character.id);
-    const docSnap = await getDoc(docRef);
-  
-    if (docSnap.exists()) {
-      const serverCharacterData = { id: character.id, ...docSnap.data() };
-      setEditCharacter(serverCharacterData);
-      setShowModal(true);
-    }
-  }, [db]);
-  
-  // 모달 닫기
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const [sortOrder, setSortOrder] = useState('desc');
   
 
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // const fetchData = async () => {
-  //   if (isLoading) return;
-  //   setIsLoading(true);
-  //   localStorage.removeItem('characters');
-  //   console.log('on load')
-
-  //   try {
-  //     const querySnapshot = await getDocs(collection(db, "char"));
-  //     const serverCharacterList = querySnapshot.docs.map(doc => {
-  //       const { detail, images, ...data } = doc.data();
-  //       return { id: doc.id, ...data };
-  //     });
-  //     localStorage.setItem('characters', JSON.stringify(serverCharacterList));
-  //     console.log('local save')
-  //   } catch (error) {
-  //     console.error("Error loading data: ", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //     setDataFetched(true);
-  //     console.log('off load')
-  //   }
-  // };
-
+  // 캐릭터 데이터 불러오기
   const fetchData = async () => {
-    if (isLoading) return;
     setIsLoading(true);
-  
     try {
-      const querySnapshot = await getDocs(collection(db, "char2"));
-      let serverCharacterList = querySnapshot.docs.map(doc => ({
+      const querySnapshot = await getDocs(collection(db, "characters"));
+      const serverCharacterList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
-      // 로컬 스토리지에서 캐릭터 데이터 가져오기
-      const localDataRaw = localStorage.getItem('characters');
-      const localCharacterList = localDataRaw ? JSON.parse(localDataRaw) : [];
-  
-      // 서버 데이터와 로컬 데이터 비교
-      const isDataUpdated = serverCharacterList.some(serverChar => {
-        const localChar = localCharacterList.find(localChar => localChar.id === serverChar.id);
-        // 로컬에 없거나 데이터가 다른 경우 업데이트 필요
-        return !localChar || JSON.stringify(localChar) !== JSON.stringify(serverChar);
-      });
-  
-      if (isDataUpdated || !localDataRaw) {
-        // 변경된 데이터로 로컬 스토리지 업데이트
-        localStorage.setItem('characters', JSON.stringify(serverCharacterList));
-      } else {
-        // 변경사항이 없다면 서버 데이터 대신 로컬 데이터 사용
-        serverCharacterList = localCharacterList;
-      }
-  
-      // 생일순으로 정렬하기 전에 데이터가 최신인지 확인
-      serverCharacterList.sort((a, b) => a.birth.localeCompare(b.birth));
-  
-      // UI 업데이트를 위한 상태 설정
       setCharacters(serverCharacterList);
     } catch (error) {
       console.error("Error loading data: ", error);
     } finally {
       setIsLoading(false);
-      setDataFetched(true);
     }
   };
-  
-  
 
-  useEffect(() => {  
+  useEffect(() => {
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const applyFiltersAndSorting = (characterList) => {
-      // 검색어에 따른 필터링
-      if (searchTerm) {
-        characterList = characterList.filter(character =>
-          Object.entries(character).some(([key, value]) =>
-            !['detail', 'badship', 'body'].includes(key) && 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-        );
+  const sortedCharacters = useMemo(() => {
+    const sorted = [...characters];
+    sorted.sort((a, b) => {
+      if (sortOrder === 'asc') {
+        return a.birth - b.birth;
+      } else {
+        return b.birth - a.birth;
       }
-      // 선택된 가족 또는 파티에 따른 정렬
-      characterList = characterList.sort((a, b) => {
-        if (selectedFamily && (a.family === selectedFamily && b.family !== selectedFamily)) {
-          return -1;
-        }
-        if (selectedFamily && (a.family !== selectedFamily && b.family === selectedFamily)) {
-          return 1;
-        }
-        if (selectedParty && (a.party === selectedParty && b.party !== selectedParty)) {
-          return -1;
-        }
-        if (selectedParty && (a.party !== selectedParty && b.party === selectedParty)) {
-          return 1;
-        }
-        return a.birth - b.birth; // 기본 정렬은 생년월일에 따라
-      });
-      setCharacters(characterList);
-    };
-    
-    // 캐시된 데이터를 항상 불러와서 적용
-    const cachedData = localStorage.getItem('characters');
-    if (cachedData) {
-      const characterList = JSON.parse(cachedData);
-      applyFiltersAndSorting(characterList);
-    }
-  }, [searchTerm, selectedFamily, selectedParty, dataFetched]);
-  
+    });
+    return sorted;
+  }, [characters, sortOrder]);
 
-  const handleFamilyClick = useCallback((familyName) => {
-    setSelectedFamily(familyName);
-  }, []);
-  
-  const handlePartyClick = useCallback((partyName) => {
-    setSelectedParty(partyName);
-  }, []);
+  const toggleSortOrder = () => {
+    setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+  };
+    
   
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
   }, []);
 
-  // 하이라이트 처리 함수
-  const highlightText = useCallback((text, highlight) => {
-    if (!highlight.trim() || !text) {
-      return text;
-    }
-    const regex = new RegExp(`(${highlight})`, 'gi');
-    return text.replace(regex, '<span style="color: rgb(230, 230, 88);">$1</span>');
-  }, []);
-
-
   const handleNewCharacterChange = (e) => {
     setNewCharacter({ ...newCharacter, [e.target.name]: e.target.value });
   };
 
-  const characterRefs = useRef({});
+  const openModal = async (characterId) => {
+    const docRef = doc(db, "character_details", characterId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setCurrentCharacter({ id: characterId, ...docSnap.data() });
+      setShowModal(true);
+    } else {
+      console.error("No such character details!");
+      alert('없는데 걔?')
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+
+  
   // 캐릭터 추가
+  const characterRefs = useRef({});
   const addCharacter = async () => {
     if (newCharacter.name.trim() === '') return;
 
-    // 캐릭터 목록에서 동일한 name과 family를 가진 캐릭터 검사
-    const isDuplicate = characters.some(character => 
+    // 캐릭터 목록에서 동일한 이름과 가문을 가진 캐릭터 검사
+    const isDuplicate = characters.some(character =>
       character.name === newCharacter.name && character.family === newCharacter.family);
 
     if (isDuplicate) {
@@ -202,14 +104,53 @@ const Character = () => {
       }
       return;
     }
-    
-    const docId = `${newCharacter.name} ${newCharacter.family}`
+
+    const docId = `${newCharacter.name} ${newCharacter.family.trim() || 'Unknown'}`;
+    const characterData = {
+      birth: newCharacter.birth.trim() || '',
+      name: newCharacter.name.trim(),
+      family: newCharacter.family.trim() || '',
+      title: newCharacter.title.trim() || '',
+      gender: newCharacter.gender.trim() || '',
+      unit: newCharacter.unit.trim() || '',
+      party: newCharacter.party.trim() || '',
+      skill: newCharacter.skill.trim() || '',
+      body: newCharacter.body.trim() || '',
+    };
+    const detailData = {
+      birth: newCharacter.birth.trim() || '',
+      name: newCharacter.name.trim(),
+      family: newCharacter.family.trim() || '',
+      title: newCharacter.title.trim() || '',
+      gender: newCharacter.gender.trim() || '',
+      unit: newCharacter.unit.trim() || '',
+      party: newCharacter.party.trim() || '',
+      country: newCharacter.country.trim() || '',
+      detail: newCharacter.detail.trim() || '',
+      personality: newCharacter.personality.trim() || '',
+      weapon: newCharacter.weapon.trim() || '',
+      skill: newCharacter.skill.trim() || '',
+      hobby: newCharacter.hobby.trim() || '',
+      talent: newCharacter.talent.trim() || '',
+      body: newCharacter.body.trim() || '',
+      familyRelation: newCharacter.familyRelation.trim() || '',
+      marriage: newCharacter.marriage.trim() || '',
+      parent: newCharacter.parent.trim() || '',
+      child: newCharacter.child.trim() || '',
+      brother: newCharacter.brother.trim() || '',
+      voice: newCharacter.voice.trim() || '',
+      series: newCharacter.voice.trim() || '',
+      Images: newCharacter.Images.trim() || '',
+    };
+
     try {
-      await setDoc(doc(db, "char2", docId), newCharacter);
-      setNewCharacter({ 
+      await setDoc(doc(db, "characters", docId), characterData);
+      await setDoc(doc(db, "character_details", docId), detailData);
+      setNewCharacter({
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
-        weapon: '', skill: '', hobby: '', talent: '', body: '', country:'', familyRelation: '', goodship: '', badship: '',
-        marriage: '', parent: '', child: '', brother: '', Images: '', voice: '', });
+        weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '',
+        marriage: '', parent: '', child: '', brother: '', Images: '', voice: '', series: '',
+      });
     } catch (error) {
       console.error("Error adding document: ", error);
     } finally {
@@ -217,191 +158,88 @@ const Character = () => {
     }
   };
 
-  const deleteCharacter = async (id) => {
-    if (!id) {
-      console.error("Invalid or missing document ID");
-      return;
-    }
-  
-    try {
-      await deleteDoc(doc(db, "char2", id));
-    } catch (error) {
-      console.error("Error deleting document: ", error);
-    } finally {
-      closeModal();
-      fetchData()
-    }
-  };
-
-
   // 연도 설정 나이 계산  
   const handleYearChange = (e) => {
     setCurrentYear(e.target.value);
   };
-
   const calculateAge = useCallback((birthYear) => {
   return currentYear - birthYear;
   }, [currentYear]);
   
+  const DetailModalMemo = React.memo(NewDetailModal);
 
-  const DetailModalMemo = React.memo(DetailModal);
-  // 관계 업데이트 후 상태를 업데이트하는 함수
-  const updateCharactersState = (updatedCharacter) => {
-    setCharacters(prevCharacters => 
-      prevCharacters.map(character => 
-        character.id === updatedCharacter.id ? updatedCharacter : character
-      )
-    );
-  };
-
-  const characterListUI = useMemo(() => 
-    characters.map((character) => (
-      <div className='indexs' key={character.id}
-      ref={el => characterRefs.current[`${character.name}-${character.family}`] = el}>
-        <div className='infos'>
-          <div className='profile'>
-            {/* birth 필드 */}
-            <div className='info birth'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.birth, searchTerm) }}></span>
-            </div>
-            {/* name 필드 */}
-            <div className='info name' onClick={() => openModal(character)}>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.name?.substring(0, 6), searchTerm) }}></span>{character.name?.length > 6 ? '...' : ''}
-            </div>
-            {/* family 필드 */}
-            <div className='info fam' onClick={() => handleFamilyClick(character.family)}>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.family?.substring(0, 7), searchTerm) }}></span>{character.family?.length > 7 ? '...' : ''}
-            </div>
-            {/* title 필드 */}
-            <div className='info title'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.title?.substring(0, 10), searchTerm) }}></span>{character.title?.length > 10 ? '...' : ''}
-            </div>
-            {/* age 필드 */}
-            <div className='info age'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(String(calculateAge(character.birth)) + '세', searchTerm) }}></span>
-            </div>
-            {/* gender 필드 */}
-            <div className='info gen'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.gender, searchTerm) }}></span>
-            </div>
-            {/* unit 필드 */}
-            <div className='info unit'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.unit?.substring(0, 5), searchTerm) }}></span>{character.unit?.length > 5 ? '...' : ''}
-            </div>
-            {/* party 필드 */}
-            <div className='info party' onClick={() => handlePartyClick(character.party)}>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.party?.substring(0, 10), searchTerm) }}></span>{character.party?.length > 10 ? '...' : ''}
-            </div>
-            {/* personality 필드 */}
-            <div className='info personality'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.personality, searchTerm) }}></span>
-            </div>
-            {/* weapon 필드 */}
-            <div className='info weapon'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.weapon?.substring(0, 11), searchTerm) }}></span>{character.weapon?.length > 11 ? '...' : ''}
-            </div>
-            {/* skill 필드 */}
-            <div className='info skill'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.skill?.substring(0, 11), searchTerm) }}></span>{character.skill?.length > 11 ? '...' : ''}
-            </div>
-            {/* hobby 필드 */}
-            <div className='info hobby'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.hobby?.substring(0, 6), searchTerm) }}></span>{character.hobby?.length > 6 ? '...' : ''}
-            </div>
-            {/* talent 필드 */}
-            <div className='info talent'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.talent?.substring(0, 6), searchTerm) }}></span>{character.talent?.length > 6 ? '...' : ''}
-            </div>
-            {/* body 필드 */}
-            <div className='info body'>
-              {character.body?.substring(0, 14)}{character.body?.length > 14 ? '...' : ''}
-            </div>
-            {/* country 필드 */}
-            <div className='info country'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.country?.substring(0, 8), searchTerm) }}></span>{character.country?.length > 8 ? '...' : ''}
-            </div>
-            {/* voice 필드 */}
-            <div className='info voice'>
-              <span dangerouslySetInnerHTML={{ __html: highlightText(character.voice?.substring(0, 10), searchTerm) }}></span>{character.voice?.length > 10 ? '...' : ''}
-            </div>
-          </div>
-        </div>
-      </div>
-    )),
-    [characters, searchTerm, openModal, highlightText, calculateAge, handleFamilyClick, handlePartyClick]
-  );
-
+  const characterListTable = useMemo(() => (
+    <table className='character-table'>
+      <thead>
+        <tr>
+          <th>출생</th>
+          <th>이름</th>
+          <th>성(가문)</th>
+          <th>칭호</th>
+          <th>나이</th>
+          <th>성별</th>
+          <th>유닛</th>
+          <th>소속</th>
+          <th>스킬</th>
+          <th>신체</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedCharacters.map(character => (
+          <tr key={character.id} className='tableline' onClick={() => openModal(character.id)}>
+            <td>{character.birth}</td>
+            <td>{character.name}</td>
+            <td>{character.family}</td>
+            <td>{character.title}</td>
+            <td>{calculateAge(character.birth) + '세'}</td>
+            <td>{character.gender}</td>
+            <td>{character.unit}</td>
+            <td>{character.party}</td>
+            <td>{character.skill}</td>
+            <td>{character.body}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [sortedCharacters, calculateAge]);
   
   return (
-    <div className='char-comp'>
+    <div className='characters'>
       {isLoading && <Spinner />}
       <div className='search'>
+        <button onClick={toggleSortOrder}>
+            {sortOrder.toUpperCase()}
+        </button>
         현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
         검색: <input type='text' placeholder='search' value={searchTerm} onChange={handleSearchChange} />
       </div>
 
-        <div className='index-fixed'>
-          <div className='indexs'>
-            <div className='infos'>
-              <div className='profile'>
-                <div className='info birth'>출생</div>
-                <div className='info name'>이름</div>
-                <div className='info fam'>성(가문)</div>
-                <div className='info title'>칭호</div>
-                <div className='info age'>나이</div>
-                <div className='info gen'>성</div>
-                <div className='info unit'>유닛</div>
-                <div className='info party'>소속</div>
-                <div className='info personality'>성향</div>
-                <div className='info weapon'>무기</div>
-                <div className='info skill'>기술</div>
-                <div className='info hobby'>취미</div>
-                <div className='info talent'>특기</div>
-                <div className='info body'>신체</div>
-                <div className='info country'>출신</div>
-                <div className='info voice'>성우</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {isLoading ? <p>Loading characters...</p> : null}
-      <div style={{ height: '600px', width: '1800px', overflowY: 'scroll', margin: '10px auto', padding: '10px', border: '1px solid white', position: 'relative' }}>
-        {characterListUI}
+      {isLoading ? <p>Loading characters...</p> : null}
+      <div className='ListTable'>
+        {characterListTable}
       </div>
 
        {/* 추가 입력 필드 */}
        <div className='add-inputs'>
-        <div className='add-profile'>
-          <input type="number" name="birth" value={newCharacter.birth} onChange={handleNewCharacterChange } placeholder="Birth" autoComplete='off'/>
-          <input type="text" name="name" value={newCharacter.name} onChange={handleNewCharacterChange } placeholder="Name" autoComplete='off' />
-          <input type="text" name="family" value={newCharacter.family} onChange={handleNewCharacterChange } placeholder="Family" autoComplete='off' />
-          <input type="text" name="title" value={newCharacter.title} onChange={handleNewCharacterChange } placeholder="title" autoComplete='off' />
-          <input type="text" name="gender" value={newCharacter.gender} onChange={handleNewCharacterChange } placeholder="Gender" autoComplete='off' />
-          <input type="text" name="unit" value={newCharacter.unit} onChange={handleNewCharacterChange } placeholder="Unit" autoComplete='off' />
-          <input type="text" name="party" value={newCharacter.party} onChange={handleNewCharacterChange } placeholder="Party" autoComplete='off' />
-          <input type="text" name="personality" value={newCharacter.personality} onChange={handleNewCharacterChange } placeholder="personality" autoComplete='off' />
-          <input type="text" name="weapon" value={newCharacter.weapon} onChange={handleNewCharacterChange } placeholder="weapon" autoComplete='off' />
-          <input type="text" name="skill" value={newCharacter.skill} onChange={handleNewCharacterChange } placeholder="skill" autoComplete='off' />
-          <input type="text" name="hobby" value={newCharacter.hobby} onChange={handleNewCharacterChange } placeholder="hobby" autoComplete='off' />
-          <input type="text" name="talent" value={newCharacter.talent} onChange={handleNewCharacterChange } placeholder="talent" autoComplete='off' />
-          <input type="text" name="body" value={newCharacter.body} onChange={handleNewCharacterChange } placeholder="body" autoComplete='off' />
-          <input type="text" name="country" value={newCharacter.country} onChange={handleNewCharacterChange } placeholder="country" autoComplete='off' />
-        </div>
-        <textarea className='add-detail' type="text" name="detail" value={newCharacter.detail} onChange={handleNewCharacterChange } placeholder="Detail" />
+        <input type="number" name="birth" value={newCharacter.birth} onChange={handleNewCharacterChange } placeholder="Birth" autoComplete='off'/>
+        <input type="text" name="name" value={newCharacter.name} onChange={handleNewCharacterChange } placeholder="Name" autoComplete='off' />
+        <input type="text" name="family" value={newCharacter.family} onChange={handleNewCharacterChange } placeholder="Family" autoComplete='off' />
+        <input type="text" name="title" value={newCharacter.title} onChange={handleNewCharacterChange } placeholder="title" autoComplete='off' />
+        <input type="text" name="gender" value={newCharacter.gender} onChange={handleNewCharacterChange } placeholder="Gender" autoComplete='off' />
+        <input type="text" name="unit" value={newCharacter.unit} onChange={handleNewCharacterChange } placeholder="Unit" autoComplete='off' />
+        <input type="text" name="party" value={newCharacter.party} onChange={handleNewCharacterChange } placeholder="Party" autoComplete='off' />
+        <input type="text" name="skill" value={newCharacter.skill} onChange={handleNewCharacterChange } placeholder="skill" autoComplete='off' />
+        <input type="text" name="body" value={newCharacter.body} onChange={handleNewCharacterChange } placeholder="body" autoComplete='off' />
       </div>
-      <button onClick={addCharacter} disabled={!newCharacter.name}>추가</button>
+      <button className='comBTN' onClick={addCharacter} disabled={!newCharacter.name}>추가</button>
 
-      {/* 모달 */}
       {showModal ? (
         <DetailModalMemo
-          character={editCharacter}
           onClose={closeModal}
-          onDelete={deleteCharacter}
           nowYear={currentYear}
           openModal={openModal}
-          characters={characters}
-          onUpdate={updateCharactersState}
-          curcollection='char2'
+          character={currentCharacter}
         />
       ) : null}
 

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import { Route, HashRouter, Routes } from 'react-router-dom';
+import { Route, HashRouter, Routes, Navigate } from 'react-router-dom';
 import Main from './pages/main';
 import History from './pages/History';
 import Character from './pages/Character';
@@ -10,17 +10,26 @@ import Game from './pages/Game';
 import NavBar from './components/NavBar';
 import Family from './pages/Family';
 import New from './pages/New'
+import Auth from './Auth';
 
 function App() {
+
+  const [token, setToken] = useState(sessionStorage.getItem('token'));
+
+  const requireAuth = (element) => {
+    return token ? element : <Navigate to="/auth" />;
+  };
+
   return (
     <HashRouter basename=''>
         <NavBar />
         <div className='routes-container'>
           <Routes>
-            <Route path="/" element={<Main />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/character" element={<Character />} />
-            <Route path="/family" element={<Family />} />
+            <Route path="/auth" element={<Auth setToken={setToken} />} />
+            <Route path="/" element={requireAuth(<Main />)} />
+            <Route path="/history" element={requireAuth(<History />)} />
+            <Route path="/character" element={requireAuth(<Character />)} />
+            <Route path="/family" element={requireAuth(<Family />)} />
             <Route path="/new" element={<New />} />
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
