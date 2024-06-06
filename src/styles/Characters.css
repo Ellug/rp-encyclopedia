@@ -31,7 +31,9 @@
 
 .characters .search {
   margin-top: 50px;
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .characters .ListTable {
   margin: 0 auto;
@@ -94,5 +96,8 @@
   .character-table th:nth-child(n+5),
   .character-table td:nth-child(n+5) {
     display: none;
+  }
+  .characters .search {
+    flex-direction: column;
   }
 }

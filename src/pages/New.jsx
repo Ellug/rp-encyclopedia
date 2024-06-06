@@ -17,8 +17,9 @@ const Character = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentYear, setCurrentYear] = useState('52');
   const [currentCharacter, setCurrentCharacter] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchCategory, setSearchCategory] = useState('name');
   
 
   // 캐릭터 데이터 불러오기
@@ -31,6 +32,7 @@ const Character = () => {
         ...doc.data(),
       }));
       setCharacters(serverCharacterList);
+      console.log('fetched')
     } catch (error) {
       console.error("Error loading data: ", error);
     } finally {
@@ -43,26 +45,45 @@ const Character = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sortedCharacters = useMemo(() => {
-    const sorted = [...characters];
-    sorted.sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a.birth - b.birth;
-      } else {
-        return b.birth - a.birth;
-      }
-    });
-    return sorted;
-  }, [characters, sortOrder]);
+  // const sortedCharacters = useMemo(() => {
+  //   const sorted = [...characters];
+  //   sorted.sort((a, b) => {
+  //     if (sortOrder === 'asc') {
+  //       return a.birth - b.birth;
+  //     } else {
+  //       return b.birth - a.birth;
+  //     }
+  //   });
+  //   return sorted;
+  // }, [characters, sortOrder]);
 
   const toggleSortOrder = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
   };
+
+  const sortedAndFilteredCharacters = useMemo(() => {
+    return characters
+      .filter(character => {
+        const value = character[searchCategory]?.toLowerCase();
+        return value && value.includes(searchTerm.toLowerCase());
+      })
+      .sort((a, b) => {
+        if (sortOrder === 'asc') {
+          return a.birth - b.birth;
+        } else {
+          return b.birth - a.birth;
+        }
+      });
+  }, [characters, searchTerm, searchCategory, sortOrder]);
     
   
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
   }, []);
+
+  const handleCategoryChange = (e) => {
+    setSearchCategory(e.target.value);
+  };
 
   const handleNewCharacterChange = (e) => {
     setNewCharacter({ ...newCharacter, [e.target.name]: e.target.value });
@@ -185,7 +206,7 @@ const Character = () => {
         </tr>
       </thead>
       <tbody>
-        {sortedCharacters.map(character => (
+        {sortedAndFilteredCharacters.map(character => (
           <tr key={character.id} className='tableline' onClick={() => openModal(character.id)}>
             <td>{character.birth}</td>
             <td>{character.name}</td>
@@ -202,17 +223,28 @@ const Character = () => {
       </tbody>
     </table>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [sortedCharacters, calculateAge]);
+  ), [sortedAndFilteredCharacters, calculateAge]);
   
   return (
     <div className='characters'>
       {isLoading && <Spinner />}
       <div className='search'>
-        <button onClick={toggleSortOrder}>
+        <button onClick={toggleSortOrder} style={{margin: '10px'}}>
             {sortOrder.toUpperCase()}
         </button>
-        현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
-        검색: <input type='text' placeholder='search' value={searchTerm} onChange={handleSearchChange} />
+        <div>
+          현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
+        </div>
+        <div style={{ display: 'flex'}}>
+          검색:
+          <select onChange={handleCategoryChange} value={searchCategory}>
+            <option value="name">이름</option>
+            <option value="family">가문</option>
+            <option value="party">소속</option>
+            <option value="series">시리즈</option>
+          </select>
+          <input type='text' placeholder='search' value={searchTerm} onChange={handleSearchChange} style={{ width: '200px'}} />
+        </div>
       </div>
 
       {isLoading ? <p>Loading characters...</p> : null}
