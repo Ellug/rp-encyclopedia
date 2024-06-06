@@ -58,24 +58,24 @@ const ImageUpload = ({ character, editCharacter }) => {
     if (!window.confirm("정말로 삭제하시겠습니까?")) {
       return;
     }
-    const imageToDelete = images[index];
-    const storageRef = ref(storage, imageToDelete);
+    const imageUrl = images[index];
+    const storageRef = ref(storage, imageUrl);
   
     try {
       await deleteObject(storageRef);
       console.log('File deleted successfully');
-      // 상태에서 이미지 URL 제거
-      const newImages = images.filter((_, i) => i !== index);
-      setImages(newImages);
+      const updatedImages = images.filter((_, i) => i !== index);
+      setImages(updatedImages);
       setCurrentIndex(currentIndex > 0 ? currentIndex - 1 : 0);
-      // Firestore에서 이미지 URL 제거
-      const docRef = doc(db, 'character_details', `${character.name} ${character.family}`);
+  
+      const docId = character.family ? `${character.name} ${character.family}` : character.name;
+      const docRef = doc(db, 'character_details', docId);
       await updateDoc(docRef, {
-        images: arrayRemove(imageToDelete)
+        images: arrayRemove(imageUrl)
       });
     } catch (error) {
-      console.error('Error removing image: ', error);
-      alert('이미지를 삭제하는 데 실패했습니다.');
+      console.error('Error removing image:', error);
+      alert('이미지 삭제 실패. 다시 시도해주세요.');
     }
   };
   

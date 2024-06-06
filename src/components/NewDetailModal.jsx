@@ -3,10 +3,12 @@ import { deleteDoc, setDoc, doc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import '../styles/NewDetailModal.css';
 import ImageUpload from './ImageUpload';
+import { deleteObject, getStorage, listAll, ref } from 'firebase/storage';
 
-const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, onUpdate }) => {
+const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const db = getFirestore();
+  const storage = getStorage();
   const originalDocId = `${character.name} ${character.family}`;
   const [images, setImages] = useState(character.images || []);
 
@@ -83,10 +85,34 @@ const DetailModal = ({ character, onClose, onDelete, nowYear, openModal, onUpdat
     setIsEditing(false);
   };
 
-  const confirmDeletion = () => {
+  const deleteStorageFolder = async (path) => {
+    const folderRef = ref(storage, path);
+    try {
+      const listResult = await listAll(folderRef);
+      listResult.items.forEach(async (itemRef) => {
+        await deleteObject(itemRef);
+      });
+      console.log('All files in the folder have been deleted');
+    } catch (error) {
+      console.error("Failed to delete storage folder:", error);
+    }
+  };
+  
+  const confirmDeletion = async () => {
+    const docId = character.family ? `${character.name} ${character.family}` : character.name;
     if(window.confirm("정말로 삭제하시겠습니까?")) {
-      console.log("Deleting character with ID:", character.id);
-      onDelete(character.id);
+      try {
+        // Firestore에서 문서 삭제
+        await deleteDoc(doc(db, "characters", docId));
+        await deleteDoc(doc(db, "character_details", docId));
+  
+        // Storage에서 이미지 폴더 삭제
+        await deleteStorageFolder(`charactersIMG/${docId}`);
+        onClose(); // 모달 닫기
+      } catch (error) {
+        console.error("Error deleting document or folder: ", error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
     }
   };
 

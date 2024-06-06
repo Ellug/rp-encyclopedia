@@ -11,7 +11,7 @@ const Character = () => {
   const [newCharacter, setNewCharacter] = useState({
     birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
     weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '',
-    marriage: '', brother: '', parent: '', child: '', Images: '', voice: '', series: '',
+    marriage: '', brother: '', parent: '', child: '', voice: '', series: '',
   });
   const db = getFirestore(database);
   const [showModal, setShowModal] = useState(false);
@@ -112,19 +112,24 @@ const Character = () => {
   const addCharacter = async () => {
     if (newCharacter.name.trim() === '') return;
 
-    // 캐릭터 목록에서 동일한 이름과 가문을 가진 캐릭터 검사
-    const isDuplicate = characters.some(character =>
-      character.name === newCharacter.name && character.family === newCharacter.family);
+  // 성이 없는 경우 이름만으로, 성이 있는 경우는 이름과 성을 조합하여 중복 검사
+  const characterIdToCheck = newCharacter.family.trim() ? `${newCharacter.name}-${newCharacter.family}` : newCharacter.name;
 
-    if (isDuplicate) {
-      alert("동일한 이름과 가문을 가진 캐릭터가 이미 존재합니다.");
-      // 해당 캐릭터 위치로 스크롤
-      const duplicateCharacterRef = characterRefs.current[`${newCharacter.name}-${newCharacter.family}`];
-      if (duplicateCharacterRef) {
-        duplicateCharacterRef.scrollIntoView({ behavior: 'smooth' });
-      }
-      return;
+  // 캐릭터 목록에서 동일한 이름(과 가문)을 가진 캐릭터 검사
+  const isDuplicate = characters.some(character => {
+    const existingCharacterId = character.family.trim() ? `${character.name}-${character.family}` : character.name;
+    return characterIdToCheck === existingCharacterId;
+  });
+
+  if (isDuplicate) {
+    alert("동일한 이름(과 가문)을 가진 캐릭터가 이미 존재합니다.");
+    // 해당 캐릭터 위치로 스크롤
+    const duplicateCharacterRef = characterRefs.current[characterIdToCheck];
+    if (duplicateCharacterRef) {
+      duplicateCharacterRef.scrollIntoView({ behavior: 'smooth' });
     }
+    return;
+  }
 
     const docId = newCharacter.family.trim() ? `${newCharacter.name} ${newCharacter.family.trim()}` : newCharacter.name.trim();
     const characterData = {
@@ -160,8 +165,7 @@ const Character = () => {
       child: newCharacter.child.trim() || '',
       brother: newCharacter.brother.trim() || '',
       voice: newCharacter.voice.trim() || '',
-      series: newCharacter.voice.trim() || '',
-      Images: newCharacter.Images.trim() || '',
+      series: newCharacter.series.trim() || '',
     };
 
     try {
@@ -170,7 +174,7 @@ const Character = () => {
       setNewCharacter({
         birth: '', name: '', family: '', title: '', gender: '', unit: '', party: '', personality: '', detail: '',
         weapon: '', skill: '', hobby: '', talent: '', body: '', country: '', familyRelation: '',
-        marriage: '', parent: '', child: '', brother: '', Images: '', voice: '', series: '',
+        marriage: '', parent: '', child: '', brother: '', voice: '', series: '',
       });
     } catch (error) {
       console.error("Error adding document: ", error);
