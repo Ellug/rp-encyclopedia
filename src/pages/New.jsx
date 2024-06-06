@@ -105,7 +105,7 @@ const Character = () => {
       return;
     }
 
-    const docId = `${newCharacter.name} ${newCharacter.family.trim() || 'Unknown'}`;
+    const docId = newCharacter.family.trim() ? `${newCharacter.name} ${newCharacter.family.trim()}` : newCharacter.name.trim();
     const characterData = {
       birth: newCharacter.birth.trim() || '',
       name: newCharacter.name.trim(),

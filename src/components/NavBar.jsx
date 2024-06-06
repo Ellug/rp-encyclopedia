@@ -50,12 +50,12 @@ const NavBar = () => {
         </div>
         <div ref={menuRef} className={`menus ${isMenuVisible ? 'show' : ''}`}>
           <div className={`menu ${isActive('/history')}`} onClick={() => navigateTo('/history')}>HISTORY</div>
-          <div className={`menu ${isActive('/character')}`} onClick={() => navigateTo('/character')}>CHARACTER</div>
-          <div className={`menu ${isActive('/new')}`} onClick={() => navigateTo('/new')}>NEW CHARACTER LIST</div>
+          <div className={`menu ${isActive('/new')}`} onClick={() => navigateTo('/new')}>CHARACTERS</div>
           <div className={`menu ${isActive('/family')}`} onClick={() => navigateTo('/family')}>Family&Skill</div>
           <div className={`menu ${isActive('/etc')}`} onClick={() => navigateTo('/etc')}>ETC</div>
           <div className={`menu ${isActive('/map')}`} onClick={() => navigateTo('/map')}>MAP</div>
           <div className={`menu ${isActive('/game')}`} onClick={() => navigateTo('/game')}>GAME</div>
+          <div className={`menu ${isActive('/character')}`} onClick={() => navigateTo('/character')}>OLD CHARACTER</div>
         </div>
       </div>
     </div>
