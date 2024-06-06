@@ -55,23 +55,30 @@ const ImageUpload = ({ character, editCharacter }) => {
   };
   
   const deleteImage = async (index) => {
+    if (!window.confirm("정말로 삭제하시겠습니까?")) {
+      return;
+    }
     const imageToDelete = images[index];
     const storageRef = ref(storage, imageToDelete);
-
-    deleteObject(storageRef).then(() => {
+  
+    try {
+      await deleteObject(storageRef);
       console.log('File deleted successfully');
+      // 상태에서 이미지 URL 제거
       const newImages = images.filter((_, i) => i !== index);
       setImages(newImages);
       setCurrentIndex(currentIndex > 0 ? currentIndex - 1 : 0);
-
+      // Firestore에서 이미지 URL 제거
       const docRef = doc(db, 'character_details', `${character.name} ${character.family}`);
-      updateDoc(docRef, {
+      await updateDoc(docRef, {
         images: arrayRemove(imageToDelete)
       });
-    }).catch((error) => {
+    } catch (error) {
       console.error('Error removing image: ', error);
-    });
+      alert('이미지를 삭제하는 데 실패했습니다.');
+    }
   };
+  
 
   const nextImage = () => {
     setCurrentIndex((currentIndex + 1) % images.length);
