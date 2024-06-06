@@ -51,6 +51,13 @@
   font-size: 13px;
   color: #fff;
 }
+.character-table thead th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color: #444;
+  z-index: 10;
+}
 
 .character-table th,
 .character-table td {
@@ -61,6 +68,11 @@
 .character-table th:first-child,
 .character-table td:first-child {
   width: 50px;
+  text-align: center;
+}
+.character-table th:nth-child(2),
+.character-table td:nth-child(2) {
+  text-align: right;
 }
 .character-table th {
   background-color: #444;

@@ -209,7 +209,7 @@ const Character = () => {
           <th>신체</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className='innerList'>
         {sortedAndFilteredCharacters.map(character => (
           <tr key={character.id} className='tableline' onClick={() => openModal(character.id)}>
             <td>{character.birth}</td>
