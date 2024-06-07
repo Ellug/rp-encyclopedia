@@ -10,15 +10,18 @@ const ImageUpload = ({ character, editCharacter }) => {
   const db = getFirestore();
   const storage = getStorage();
 
+  const docId = character.family ? `${character.name} ${character.family}` : character.name;
+  const folderPath = `charactersIMG/${docId}`;
+
   const handleImageUpload = async (event) => {
     const files = event.target.files;
     if (!files.length) return;
-  
+
     const newImages = [];
     Array.from(files).forEach(file => {
-      const storageRef = ref(storage, `charactersIMG/${character.name} ${character.family}/${file.name}`);
+      const storageRef = ref(storage, `${folderPath}/${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
-  
+
       uploadTask.on('state_changed',
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -37,8 +40,7 @@ const ImageUpload = ({ character, editCharacter }) => {
                 images: [...images, ...newImages]
               };
               setImages(updatedCharacterData.images);
-              const docRef = doc(db, 'character_details', `${character.name} ${character.family}`);
-              setDoc(docRef, updatedCharacterData, { merge: true }).then(() => {
+              setDoc(doc(db, 'character_details', docId), updatedCharacterData, { merge: true }).then(() => {
                 console.log('Document successfully updated with new images');
               }).catch((error) => {
                 console.error("Error updating document: ", error);

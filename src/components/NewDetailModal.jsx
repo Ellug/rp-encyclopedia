@@ -49,7 +49,8 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
       unit: editCharacter.unit,
       party: editCharacter.party,
       skill: editCharacter.skill,
-      body: editCharacter.body
+      body: editCharacter.body,
+      series: editCharacter.series
     };
 
     const detailData = {
@@ -109,6 +110,7 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
         // Storage에서 이미지 폴더 삭제
         await deleteStorageFolder(`charactersIMG/${docId}`);
         onClose(); // 모달 닫기
+        window.location.reload();
       } catch (error) {
         console.error("Error deleting document or folder: ", error);
         alert('삭제 중 오류가 발생했습니다.');

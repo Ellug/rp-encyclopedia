@@ -26,9 +26,9 @@
 
 .close {
   color: #aaa;
-  position: absolute;
-  top: 2%;
-  right: 2%;
+  position: fixed;
+  top: 3%;
+  right: 9%;
   font-size: 32px;
   font-weight: bold;
   cursor: pointer;

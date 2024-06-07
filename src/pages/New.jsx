@@ -45,17 +45,7 @@ const Character = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // const sortedCharacters = useMemo(() => {
-  //   const sorted = [...characters];
-  //   sorted.sort((a, b) => {
-  //     if (sortOrder === 'asc') {
-  //       return a.birth - b.birth;
-  //     } else {
-  //       return b.birth - a.birth;
-  //     }
-  //   });
-  //   return sorted;
-  // }, [characters, sortOrder]);
+
 
   const toggleSortOrder = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
@@ -245,7 +235,6 @@ const Character = () => {
             <option value="name">이름</option>
             <option value="family">가문</option>
             <option value="party">소속</option>
-            <option value="series">시리즈</option>
           </select>
           <input type='text' placeholder='search' value={searchTerm} onChange={handleSearchChange} style={{ width: '200px'}} />
         </div>

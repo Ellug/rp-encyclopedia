@@ -47,7 +47,7 @@ const NavBar = () => {
           <div className="bar"></div>
           <div className="bar"></div>
           <div className="bar"></div>
-        </div>
+        </div> 
         <div ref={menuRef} className={`menus ${isMenuVisible ? 'show' : ''}`}>
           <div className={`menu ${isActive('/history')}`} onClick={() => navigateTo('/history')}>HISTORY</div>
           <div className={`menu ${isActive('/new')}`} onClick={() => navigateTo('/new')}>CHARACTERS</div>
