@@ -17,7 +17,7 @@ function Auth({ setToken }) {
   };
 
   return (
-    <div>
+    <div style={{ textAlign: 'center', paddingTop: 40 }}>
       <form onSubmit={handleSubmit}>
         <label>
           비밀번호 입력:
