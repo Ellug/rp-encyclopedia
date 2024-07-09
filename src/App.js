@@ -7,6 +7,7 @@ import Character from './pages/Character';
 import Etc from './pages/ETC';
 import Map from './pages/Map';
 import Game from './pages/Game';
+import Mafia from './pages/Mafia';
 import NavBar from './components/NavBar';
 import Family from './pages/Family';
 import New from './pages/New'
@@ -33,6 +34,7 @@ function App() {
             <Route path="/new" element={<New />} />
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
+            <Route path="/mafia" element={<Mafia />} />
             <Route path="/game" element={<Game />} />
           </Routes>
         </div>
