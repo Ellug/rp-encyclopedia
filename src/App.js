@@ -12,6 +12,7 @@ import NavBar from './components/NavBar';
 import Family from './pages/Family';
 import New from './pages/New'
 import Auth from './Auth';
+import MoogoonghwaGame from './pages/MoogoonghwaGame';
 
 function App() {
 
@@ -34,8 +35,9 @@ function App() {
             <Route path="/new" element={<New />} />
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
-            <Route path="/mafia" element={<Mafia />} />
             <Route path="/game" element={<Game />} />
+            <Route path="/mafia" element={<Mafia />} />
+            <Route path="/moogoonghwa" element={<MoogoonghwaGame />} />
           </Routes>
         </div>
     </HashRouter>

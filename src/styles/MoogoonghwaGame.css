@@ -1,0 +1,72 @@
+.MGH {
+  display: flex;
+  width: 100vw;
+}
+
+.sidebar {
+  width: 300px;
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar input {
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 90%;
+}
+
+.sidebar button {
+  margin-top: 10px;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 1px;
+  flex-grow: 1;
+  background-color: #333;
+}
+
+.cell {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.cell.highlight {
+  background-color: yellow;
+}
+
+.cell.warning {
+  background-color: plum;
+}
+
+.character {
+  width: 75px;
+  height: 75px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}

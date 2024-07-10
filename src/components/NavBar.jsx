@@ -53,6 +53,7 @@ const NavBar = () => {
           <div className={`menu ${isActive('/new')}`} onClick={() => navigateTo('/new')}>CHARACTERS</div>
           <div className={`menu ${isActive('/family')}`} onClick={() => navigateTo('/family')}>Family&Skill</div>
           <div className={`menu ${isActive('/mafia')}`} onClick={() => navigateTo('/mafia')}>Mafia</div>
+          <div className={`menu ${isActive('/moogoonghwa')}`} onClick={() => navigateTo('/moogoonghwa')}>MGH</div>
           <div className={`menu ${isActive('/etc')}`} onClick={() => navigateTo('/etc')}>ETC</div>
           <div className={`menu ${isActive('/map')}`} onClick={() => navigateTo('/map')}>MAP</div>
           <div className={`menu ${isActive('/game')}`} onClick={() => navigateTo('/game')}>GAME</div>
