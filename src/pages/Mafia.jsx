@@ -18,6 +18,10 @@ const Mafia = () => {
     scrollToBottom();
   }, [script]);
 
+  useEffect(() => {
+    checkForWinner(characters);
+  }, [characters]);
+
   const addCharacter = (e) => {
     e.preventDefault();
     if (name) {
@@ -31,13 +35,18 @@ const Mafia = () => {
     const mafiaCharacters = aliveCharacters.filter(character => character.role.startsWith('mafia'));
     const nonMafiaCharacters = aliveCharacters.filter(character => !character.role.startsWith('mafia'));
 
-    if (mafiaCharacters.length < 1) {
-      setScript(prev => [...prev, '마피아가 모두 죽었습니다. 시민의 승리입니다.', '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
+    if (mafiaCharacters.length < 1 && nonMafiaCharacters.length < 1) {
+      setScript(prev => [...prev, '마피아와 시민이 모두 사망했습니다. 게임은 무승부입니다.', '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
       return true;
     }
 
-    if (nonMafiaCharacters.length <= mafiaCharacters.length) {
-      setScript(prev => [...prev, '마피아의 수가 시민의 수와 같거나 많습니다. 마피아의 승리입니다.', '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
+    if (mafiaCharacters.length < 1) {
+      setScript(prev => [...prev, '마피아가 모두 사망했습니다. 시민의 승리입니다.', '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
+      return true;
+    }
+
+    if (nonMafiaCharacters.length < 1) {
+      setScript(prev => [...prev, '시민이 모두 사망했습니다. 마피아의 승리입니다.', '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
       return true;
     }
 
@@ -66,9 +75,6 @@ const Mafia = () => {
         return character;
       });
       setCharacters(newCharacters);
-      if (character.status === 'alive') {
-        checkForWinner(newCharacters);
-      }
     }
   };
 
@@ -107,18 +113,6 @@ const Mafia = () => {
     const nonMafiaCharacters = aliveCharacters.filter(character => !character.role.startsWith('mafia'));
     const doctors = aliveCharacters.filter(character => character.role.startsWith('doctor'));
 
-    if (mafiaCharacters.length < 1) {
-      newScript.push('마피아가 모두 죽었습니다. 시민의 승리입니다.');
-      setScript(prev => [...prev, ...newScript, '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
-      return;
-    }
-
-    if (nonMafiaCharacters.length <= mafiaCharacters.length) {
-      newScript.push('마피아의 수가 시민의 수와 같거나 많습니다. 마피아의 승리입니다.');
-      setScript(prev => [...prev, ...newScript, '--- 게임 시작 버튼을 눌러 다시 시작 가능']);
-      return;
-    }
-
     const shuffle = (array) => array.sort(() => Math.random() - 0.5);
 
     let targets = shuffle(nonMafiaCharacters).slice(0, mafiaCharacters.length);
@@ -153,8 +147,6 @@ const Mafia = () => {
     newScript.push('-------');
     setCharacters(newCharacters);
     setScript(prev => [...prev, ...newScript]);
-
-    checkForWinner(newCharacters);
   };
 
   const radius = 348;
