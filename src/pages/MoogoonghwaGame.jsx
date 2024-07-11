@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { database } from '../firebaseConfig';
+import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import '../styles/MoogoonghwaGame.css';
 
 const MoogoonghwaGame = () => {
@@ -12,10 +14,41 @@ const MoogoonghwaGame = () => {
   const [traps, setTraps] = useState([]);
   const [turnEnded, setTurnEnded] = useState(false);
 
+  const gameDocRef = doc(database, 'MGH', 'gameState');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const docSnap = await getDoc(gameDocRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setCharacters(data.characters || initialCharacters);
+        setCurrentTurn(data.currentTurn || 0);
+        setUsedTurns(data.usedTurns || Array(10).fill(false));
+        setWarningRows(data.warningRows || []);
+        setTraps(data.traps || []);
+      }
+    };
+    fetchData();
+
+    const unsubscribe = onSnapshot(gameDocRef, (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        setCharacters(data.characters || initialCharacters);
+        setCurrentTurn(data.currentTurn || 0);
+        setUsedTurns(data.usedTurns || Array(10).fill(false));
+        setWarningRows(data.warningRows || []);
+        setTraps(data.traps || []);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     if (currentTurn > 0) {
       const newWarningRows = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => Math.floor(Math.random() * 10));
       setWarningRows(newWarningRows);
+      updateGame({ warningRows: newWarningRows });
     }
   }, [currentTurn]);
 
@@ -25,14 +58,18 @@ const MoogoonghwaGame = () => {
       y: Math.floor(Math.random() * 10)
     }));
     setTraps(randomTraps);
+    updateGame({ traps: randomTraps });
   }, [currentTurn]);
 
   useEffect(() => {
     if (turnEnded) {
       endTurn();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turnEnded]);
+
+  const updateGame = async (updates) => {
+    await updateDoc(gameDocRef, updates);
+  };
 
   const handleCharacterClick = (index) => {
     if (usedTurns[index]) return;
@@ -82,6 +119,8 @@ const MoogoonghwaGame = () => {
       setHighlightedCells([]);
       setUsedTurns(newUsedTurns);
 
+      await updateGame({ characters: newCharacters, usedTurns: newUsedTurns });
+
       const movedCharacter = newCharacters[selectedCharacter];
       const trapped = traps.find(trap => trap.x === movedCharacter.x && trap.y === movedCharacter.y);
       if (trapped) {
@@ -117,30 +156,29 @@ const MoogoonghwaGame = () => {
         await moveCharacter(index, 1, 0, newCharacters);
         break;
       case 10: case 11:
-        alert('촉수 함정에 빠졌다! 뒤로 한칸')
+        alert('촉수 함정에 빠졌다! 뒤로 한칸');
         await moveCharacter(index, 1, 0, newCharacters);
-        break
+        break;
       case 12: case 13:
-        alert('최음 가스 몬스터를 밟았다! 뒤로 한칸')
+        alert('최음 가스 몬스터를 밟았다! 뒤로 한칸');
         await moveCharacter(index, 1, 0, newCharacters);
-        break
+        break;
       case 14: case 15:
-        alert('옷이 에이블리의 의복 체인지에 당해 비키니로 변했다. 뒤로 한칸')
+        alert('옷이 에이블리의 의복 체인지에 당해 비키니로 변했다. 뒤로 한칸');
         await moveCharacter(index, 1, 0, newCharacters);
-        break
+        break;
       case 16: case 17:
-        alert('옷이 에이블리의 의복 체인지에 당해 끈제복으로 변했다. 뒤로 한칸')
+        alert('옷이 에이블리의 의복 체인지에 당해 끈제복으로 변했다. 뒤로 한칸');
         await moveCharacter(index, 1, 0, newCharacters);
-        break
+        break;
       case 18:
-        alert('럭키 가속 장치! 앞으로 두칸 이동!')
+        alert('럭키 가속 장치! 앞으로 두칸 이동!');
         await moveCharacter(index, -2, 0, newCharacters);
-        break
+        break;
       case 19:
-        alert('강력한 촉수에게 잡혀 희롱당했다. 뒤로 두칸 이동!')
+        alert('강력한 촉수에게 잡혀 희롱당했다. 뒤로 두칸 이동!');
         await moveCharacter(index, -2, 0, newCharacters);
-        break
-
+        break;
       default:
         break;
     }
@@ -164,9 +202,10 @@ const MoogoonghwaGame = () => {
     });
 
     setCharacters(updatedCharacters);
+    await updateGame({ characters: updatedCharacters });
   };
 
-  const endTurn = () => {
+  const endTurn = async () => {
     console.log('endTurn 호출됨');
     const newCharacters = characters.map((char) => {
       if (warningRows.includes(char.y) && char.x < 19) {
@@ -177,7 +216,8 @@ const MoogoonghwaGame = () => {
     });
 
     setCharacters(newCharacters);
-    
+    await updateGame({ characters: newCharacters, currentTurn: currentTurn + 1, usedTurns: Array(10).fill(false) });
+
     setUsedTurns(Array(10).fill(false));
     setCurrentTurn(prevTurn => prevTurn + 1);
     setTurnEnded(false); // 턴 종료 후 다시 초기화
@@ -192,7 +232,7 @@ const MoogoonghwaGame = () => {
     }
   };
 
-  const resetGame = () => {
+  const resetGame = async () => {
     const resetCharacters = characters.map((char, index) => ({ ...char, x: 19, y: index }));
     setCharacters(resetCharacters);
     setCurrentTurn(0);
@@ -201,9 +241,16 @@ const MoogoonghwaGame = () => {
     setHighlightedCells([]);
     setSelectedCharacter(null);
     setTurnEnded(false); // 초기화
+    await setDoc(gameDocRef, {
+      characters: resetCharacters,
+      currentTurn: 0,
+      usedTurns: Array(10).fill(false),
+      warningRows: [],
+      traps: [],
+    });
   };
 
-  const handleNameChange = (index, name) => {
+  const handleNameChange = async (index, name) => {
     const newCharacters = characters.map((char, i) => {
       if (i === index) {
         return { ...char, name };
@@ -211,17 +258,19 @@ const MoogoonghwaGame = () => {
       return char;
     });
     setCharacters(newCharacters);
+    await updateGame({ characters: newCharacters });
   };
 
-  const shuffleCharacters = () => {
+  const shuffleCharacters = async () => {
     const shuffledCharacters = [...characters].sort(() => Math.random() - 0.5);
     setCharacters(shuffledCharacters.map((char, index) => ({ ...char, y: index })));
+    await updateGame({ characters: shuffledCharacters.map((char, index) => ({ ...char, y: index })) });
   };
 
   const renderCells = () => {
     const cells = [];
     for (let row = 0; row < 10; row++) {
-      for (let col = 0; col < 20; col++) {
+      for (let col = 0;  col < 20; col++) {
         const isHighlighted = highlightedCells.some(cell => cell.x === col && cell.y === row);
         const isWarningRow = warningRows.includes(row);
         const isTrap = traps.some(trap => trap.x === col && trap.y === row);
