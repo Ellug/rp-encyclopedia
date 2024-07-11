@@ -28,8 +28,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(20, 1fr);
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(30, 1fr); /* 가로 30 */
+  grid-template-rows: repeat(16, 1fr);    /* 세로 16 */
   gap: 1px;
   flex-grow: 1;
   background-color: #333;
@@ -54,9 +54,13 @@
   background-color: plum;
 }
 
+.cell.trap {
+  background-color: lightgray;
+}
+
 .character {
-  width: 75px;
-  height: 75px;
+  width: 50px;
+  height: 50px;
   background-color: red;
   border-radius: 50%;
   position: absolute;
@@ -68,5 +72,5 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 14px;
+  font-size: 13px;
 }
