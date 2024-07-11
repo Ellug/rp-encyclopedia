@@ -10,7 +10,7 @@
   background-color: #333;
   color: white;
   overflow-y: scroll;
-  z-index: 999;
+  z-index: 5;
 }
 
 .mafia-container .fixed-button {
@@ -18,7 +18,7 @@
   top: 0;
   background-color: #333;
   padding-top: 10px;
-  z-index: 1000;
+  z-index: 6;
 }
 
 .mafia-container .fixed-button button {
