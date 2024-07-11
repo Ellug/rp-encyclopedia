@@ -2,7 +2,7 @@
   display: flex;
 }
 
-.sidebar {
+.mafia-container .sidebar {
   width: 660px;
   height: calc(100vh - 70px);
   padding: 0 10px;
@@ -13,7 +13,7 @@
   z-index: 999;
 }
 
-.fixed-button {
+.mafia-container .fixed-button {
   position: sticky;
   top: 0;
   background-color: #333;
@@ -21,7 +21,7 @@
   z-index: 1000;
 }
 
-.fixed-button button {
+.mafia-container .fixed-button button {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -32,27 +32,27 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.fixed-button button:hover {
+.mafia-container .fixed-button button:hover {
   background-color: gold;
   color: black;
 }
 
-.mafia {
+.mafia-container .mafia {
   flex: 1;
   text-align: center;
   color: white;
   margin-top: 75px;
 }
 
-.input-form {
+.mafia-container .input-form {
   display: flex;
   justify-content: center;
   margin-bottom: 10px;
 }
 
-.input-form input,
-.input-form select,
-.input-form button {
+.mafia-container .input-form input,
+.mafia-container .input-form select,
+.mafia-container .input-form button {
   padding: 8px;
   font-size: 16px;
   margin: 0 5px;
@@ -62,14 +62,14 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.input-form button:hover,
-.input-form select:hover,
-.input-form input:hover {
+.mafia-container .input-form button:hover,
+.mafia-container .input-form select:hover,
+.mafia-container .input-form input:hover {
   background-color: gold;
   color: black;
 }
 
-.circle {
+.mafia-container .circle {
   position: relative;
   width: 700px;
   height: 700px;
@@ -78,7 +78,7 @@
   margin: 0 auto;
 }
 
-.character {
+.mafia-container .character {
   position: absolute;
   transform: translate(-50%, -50%);
   cursor: pointer;
@@ -86,15 +86,15 @@
   white-space: nowrap;
 }
 
-.character.alive {
+.mafia-container .character.alive {
   color: green;
 }
 
-.character.dead {
+.mafia-container .character.dead {
   color: red;
 }
 
-.turn-button {
+.mafia-container .turn-button {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -111,26 +111,26 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.turn-button:hover {
+.mafia-container .turn-button:hover {
   background-color: gold;
   color: black;
 }
 
-.turn-button:disabled {
+.mafia-container .turn-button:disabled {
   background-color: grey;
   color: darkgrey;
   cursor: not-allowed;
 }
 
-.script {
+.mafia-container .script {
   margin-top: 20px;
 }
 
-.script p {
+.mafia-container .script p {
   margin: 5px 0;
 }
 
-.script p:last-child {
+.mafia-container .script p:last-child {
   border-bottom: 1px solid white;
   padding-bottom: 5px;
 }

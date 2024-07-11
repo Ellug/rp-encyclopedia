@@ -1,9 +1,10 @@
 .MGH {
   display: flex;
   width: 100vw;
+  height: calc(100vh - 70px);
 }
 
-.sidebar {
+.MGH .sidebar {
   width: 300px;
   box-sizing: border-box;
   padding: 20px;
@@ -13,20 +14,20 @@
   align-items: center;
 }
 
-.sidebar input {
+.MGH .sidebar input {
   margin-bottom: 10px;
   padding: 5px;
   width: 90%;
 }
 
-.sidebar button {
+.MGH .sidebar button {
   margin-top: 10px;
   padding: 10px;
   width: 100%;
   cursor: pointer;
 }
 
-.grid {
+.MGH .grid {
   display: grid;
   grid-template-columns: repeat(30, 1fr); /* 가로 30 */
   grid-template-rows: repeat(16, 1fr);    /* 세로 16 */
@@ -35,7 +36,7 @@
   background-color: #333;
 }
 
-.cell {
+.MGH .cell {
   width: 100%;
   height: 100%;
   background-color: white;
@@ -46,19 +47,19 @@
   cursor: pointer;
 }
 
-.cell.highlight {
+.MGH .cell.highlight {
   background-color: yellow;
 }
 
-.cell.warning {
+.MGH .cell.warning {
   background-color: plum;
 }
 
-.cell.trap {
+.MGH .cell.trap {
   background-color: lightgray;
 }
 
-.character {
+.MGH .character {
   width: 50px;
   height: 50px;
   background-color: red;
