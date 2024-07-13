@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { updateDoc, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { database } from '../firebaseConfig';
 import '../styles/Mafia.css';
 
 const Mafia = () => {
@@ -10,6 +12,18 @@ const Mafia = () => {
   const [numPolice, setNumPolice] = useState(1);
   const scriptEndRef = useRef(null);
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(database, 'mafia', 'gameState'), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        setCharacters(data.characters || []);
+        setScript(data.script || []);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const scrollToBottom = () => {
     scriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -19,14 +33,22 @@ const Mafia = () => {
   }, [script]);
 
   useEffect(() => {
-    checkForWinner(characters);
+    if (characters.filter(character => character.role.startsWith('mafia')).length >= 1) {
+      checkForWinner(characters);
+    }
   }, [characters]);
 
-  const addCharacter = (e) => {
+  const addCharacter = async (e) => {
     e.preventDefault();
     if (name) {
-      setCharacters([...characters, { name, status: 'alive', role: 'villager' }]);
+      const newCharacters = [...characters, { name, status: 'alive', role: 'villager' }];
+      setCharacters(newCharacters);
       setName('');
+
+      await setDoc(doc(database, 'mafia', 'gameState'), {
+        characters: newCharacters,
+        script
+      });
     }
   };
 
@@ -53,7 +75,7 @@ const Mafia = () => {
     return false;
   };
 
-  const toggleStatus = (index) => {
+  const toggleStatus = async (index) => {
     const character = characters[index];
     const confirmMessage = character.status === 'alive'
       ? `${character.name}를 죽이겠습니까?`
@@ -63,10 +85,6 @@ const Mafia = () => {
       const newCharacters = characters.map((character, i) => {
         if (i === index) {
           const newStatus = character.status === 'alive' ? 'dead' : 'alive';
-          const newScript = character.status === 'alive'
-            ? `투표로 인해 ${character.name}가 죽었습니다. (${character.role.startsWith('mafia') ? '마피아' : '시민'})`
-            : `${character.name}가 부활했습니다.`;
-          setScript(prev => [...prev, newScript, '-------']);
           return {
             ...character,
             status: newStatus
@@ -74,11 +92,22 @@ const Mafia = () => {
         }
         return character;
       });
+
+      const newScript = character.status === 'alive'
+        ? `투표로 인해 ${character.name}가 죽었습니다. (${character.role.startsWith('mafia') ? '마피아' : '시민'})`
+        : `${character.name}가 부활했습니다.`;
+
       setCharacters(newCharacters);
+      setScript(prev => [...prev, newScript, '-------']);
+
+      await updateDoc(doc(database, 'mafia', 'gameState'), {
+        characters: newCharacters,
+        script: [...script, newScript, '-------']
+      });
     }
   };
 
-  const assignRoles = () => {
+  const assignRoles = async () => {
     let newCharacters = characters.map(character => ({
       ...character,
       status: 'alive',
@@ -103,9 +132,23 @@ const Mafia = () => {
 
     setCharacters(newCharacters);
     setScript([]);
+
+    await setDoc(doc(database, 'mafia', 'gameState'), {
+      characters: newCharacters,
+      script: []
+    });
   };
 
-  const proceedTurn = () => {
+  const resetCharacters = async () => {
+    setCharacters([]);
+    setScript([]);
+    await setDoc(doc(database, 'mafia', 'gameState'), {
+      characters: [],
+      script: []
+    });
+  };
+
+  const proceedTurn = async () => {
     let newCharacters = [...characters];
     let newScript = [];
     const aliveCharacters = newCharacters.filter(character => character.status === 'alive');
@@ -147,6 +190,11 @@ const Mafia = () => {
     newScript.push('-------');
     setCharacters(newCharacters);
     setScript(prev => [...prev, ...newScript]);
+
+    await updateDoc(doc(database, 'mafia', 'gameState'), {
+      characters: newCharacters,
+      script: [...script, ...newScript]
+    });
   };
 
   const radius = 348;
@@ -155,7 +203,7 @@ const Mafia = () => {
     <div className="mafia-container">
       <div className="mafia">
         <div className="circle">
-          {characters.map((character, index) => {
+          {characters && characters.map((character, index) => {
             const angle = (index / characters.length) * 2 * Math.PI;
             const x = (radius + 50) * Math.cos(angle) + radius;
             const y = (radius + 50) * Math.sin(angle) + radius;
@@ -174,7 +222,14 @@ const Mafia = () => {
               </div>
             );
           })}
-          <button className="turn-button" onClick={proceedTurn} disabled={characters.filter(c => c.role.startsWith('mafia') && c.status === 'alive').length < 1}>
+          <button
+            className="turn-button"
+            onClick={proceedTurn}
+            disabled={
+              characters.filter(c => c.role.startsWith('mafia') && c.status === 'alive').length < 1 ||
+              characters.filter(c => !c.role.startsWith('mafia') && c.status === 'alive').length < 1
+            }
+          >
             턴 진행
           </button>
         </div>
@@ -205,12 +260,17 @@ const Mafia = () => {
             </select>
             <button type="submit">추가</button>
           </form>
-          <button onClick={assignRoles}>
-            게임 시작
-          </button>
+          <div className='startBtn'>
+            <button onClick={assignRoles} disabled={characters.length <= 2}>
+              게임 시작
+            </button>
+            <button onClick={resetCharacters}>
+              캐릭터 리셋
+            </button>
+          </div>
         </div>
         <div className="script">
-          {script.map((line, index) => (
+          {script && script.map((line, index) => (
             <p key={index}>{line}</p>
           ))}
           <div ref={scriptEndRef} />
