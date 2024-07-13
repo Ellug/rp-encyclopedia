@@ -5,7 +5,7 @@
 }
 
 .MGH .sidebar {
-  width: 300px;
+  width: 250px;
   box-sizing: border-box;
   padding: 20px;
   background-color: #f4f4f4;
@@ -15,7 +15,7 @@
 }
 
 .MGH .sidebar input {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding: 5px;
   width: 90%;
 }
@@ -48,21 +48,21 @@
 }
 
 .MGH .cell.highlight {
-  background-color: yellow;
+  background-color: rgb(255, 255, 142);
 }
 
 .MGH .cell.warning {
   background-color: plum;
 }
 
-.MGH .cell.trap {
-  background-color: lightgray;
-}
+/* .MGH .cell.trap { */
+  /* background-color: no; */
+/* } */
 
 .MGH .character {
   width: 50px;
   height: 50px;
-  background-color: red;
+  background-color: rgb(67, 75, 184);
   border-radius: 50%;
   position: absolute;
   top: 50%;
@@ -73,5 +73,24 @@
   align-items: center;
   justify-content: center;
   color: white;
+  font-weight: bolder;
   font-size: 13px;
+}
+.MGH .character.used {
+  background-color: red;
+}
+
+.alerts {
+  width: 100%;
+  background-color: #f4f4f4;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.alert-message {
+  padding: 8px;
+  background-color: #faffdd;
+  border: 1px solid #ffcccc;
+  color: red;
+  font-weight: bolder;
 }

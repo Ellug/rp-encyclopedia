@@ -36,8 +36,8 @@ function App() {
             <Route path="/etc" element={<Etc />} />
             <Route path="/map" element={<Map />} />
             <Route path="/game" element={<Game />} />
-            <Route path="/mafia" element={<Mafia />} />
-            <Route path="/moogoonghwa" element={<MoogoonghwaGame />} />
+            <Route path="/mafia" element={requireAuth(<Mafia />)} />
+            <Route path="/moogoonghwa" element={requireAuth(<MoogoonghwaGame />)} />
           </Routes>
         </div>
     </HashRouter>
