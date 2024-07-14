@@ -52,7 +52,7 @@ const MoogoonghwaGame = () => {
 
   useEffect(() => {
     if (currentTurn > 0) {
-      const newWarningRows = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => Math.floor(Math.random() * 8));
+      const newWarningRows = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, () => Math.floor(Math.random() * 8));
       setWarningRows(newWarningRows);
       updateGame({ warningRows: newWarningRows });
     }
@@ -60,7 +60,7 @@ const MoogoonghwaGame = () => {
   }, [currentTurn]);
 
   useEffect(() => {
-    const randomTraps = Array.from({ length: 34 }, () => ({
+    const randomTraps = Array.from({ length: 27 }, () => ({
       x: Math.floor(Math.random() * 20),
       y: Math.floor(Math.random() * 8)
     }));
@@ -150,58 +150,58 @@ const MoogoonghwaGame = () => {
     const trapIndex = traps.indexOf(trap);
     let message = '';
     switch (trapIndex) {
-      case 0: case 5:
+      case 0:
         message = '매사드의 간지럼 고문 함정에 걸렸다! 뒤로 한칸';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 1: case 6:
+      case 1: case 16:
         message = '옷이 소멸하는 액체를 맞았다. 뒤로 한칸.';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 2: case 7:
+      case 2: case 17:
         message = '럭키! 앞으로 1칸';
         await moveCharacter(index, -1, 0, newCharacters);
         break;
-      case 3: case 8:
+      case 3:
         message = '인정받을 만한 춤을 춘다!';
         break;
-      case 4: case 9:
+      case 4: case 18:
         message = '팔굽혀펴기 10회, 스쿼트 10회. 뒤로 한칸';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 10: case 11:
+      case 5: case 19:
         message = '촉수 함정에 빠졌다! 뒤로 한칸';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 12: case 13:
+      case 6: case 20:
         message = '최음 가스 몬스터를 밟았다! 뒤로 한칸';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 14: case 15:
+      case 7: case 21:
         message = '럭키 박스! 가디언 페스티발 티켓을 얻었다!! 신나서 앞으로 1칸';
         await moveCharacter(index, -1, 0, newCharacters);
         break;
-      case 16: case 17:
+      case 8: case 15:
         message = '옷이 에이블리의 의복 체인지에 당해 끈제복으로 변했다. 뒤로 한칸';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 18: case 19:
+      case 9: case 22:
         message = '럭키 가속 장치! 앞으로 두칸 이동!';
         await moveCharacter(index, -2, 0, newCharacters);
         break;
-      case 20: case 21:
+      case 10: case 23:
         message = '강력한 촉수에게 잡혀 희롱당했다. 뒤로 두칸 이동!';
         await moveCharacter(index, 2, 0, newCharacters);
         break;
-      case 22: case 23:
+      case 11: case 24:
         message = '촉수 슈트에 잡혔다!. 뒤로 한칸 이동!';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
-      case 24: case 25:
+      case 12:
         message = '럭키 박스! 가디언 상품권을 얻었다! 신나서 앞으로 1칸!';
         await moveCharacter(index, -1, 0, newCharacters);
         break;
-      case 26: case 27: case 28:
+      case 25:
         message = '충격파 방패! 나를 제외한 모든 캐릭터가 뒤로 두칸 이동';
         const updatedCharacters = newCharacters.map((char, charIndex) => {
           if (charIndex !== index) {
@@ -211,11 +211,11 @@ const MoogoonghwaGame = () => {
         });
         await updateGame({ characters: updatedCharacters });
         break;
-      case 29: case 30: case 31:
+      case 13:
         message = '점프 스프링! 앞으로 한칸 이동!';
         await moveCharacter(index, -1, 0, newCharacters);
         break;
-      case 32: case 33: case 34:
+      case 14: case 26:
         message = '최음 점액 공격! 뒤로 한칸 이동!';
         await moveCharacter(index, 1, 0, newCharacters);
         break;
