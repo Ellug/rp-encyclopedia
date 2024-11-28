@@ -1,6 +1,5 @@
-// firebaseConfig.js
 import { initializeApp } from 'firebase/app';
-// import { getDatabase } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 import { initializeFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -9,14 +8,15 @@ const firebaseConfig = {
   projectId: "rp-encyclopedia",
   storageBucket: "rp-encyclopedia.appspot.com",
   messagingSenderId: "869065784455",
-  appId: "1:869065784455:web:10a0c69a57854b8a098c22"
+  appId: "1:869065784455:web:10a0c69a57854b8a098c22",
+  databaseURL: "https://rp-encyclopedia-default-rtdb.firebaseio.com",
 };
 
 const app = initializeApp(firebaseConfig);
-// const database = getDatabase(app);
+const realtime = getDatabase(app);
 const database = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 })
 
 export default app
-export { database };
+export { database, realtime };

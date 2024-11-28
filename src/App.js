@@ -16,6 +16,7 @@ import MoogoonghwaGame from './pages/MoogoonghwaGame';
 import Gallery from './pages/Gallery';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import app from './firebaseConfig';
+import AudioLink from './pages/AudioLink';
 
 function App() {
   const [token, setToken] = useState(sessionStorage.getItem('token'));
@@ -52,6 +53,7 @@ function App() {
           <Route path="/gallery" element={requireAuth(<Gallery />)} />
           <Route path="/family" element={requireAuth(<Family />)} />
           <Route path="/new" element={requireAuth(<New />)} />
+          <Route path="/audiolink" element={requireAuth(<AudioLink />)} />
           <Route path="/etc" element={requireAuth(<Etc />)} />
           <Route path="/map" element={<Map />} />
           <Route path="/game" element={requireAuth(<Game />)} />

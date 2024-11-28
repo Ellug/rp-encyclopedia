@@ -7,6 +7,7 @@ const ImageUpload = ({ character, editCharacter }) => {
   const [images, setImages] = useState(character.images || []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false); // 드래그 상태 추가
   const db = getFirestore();
   const storage = getStorage();
 
@@ -15,7 +16,6 @@ const ImageUpload = ({ character, editCharacter }) => {
 
   const syncGallery = async (updatedImages) => {
     try {
-      // Gallery 컬렉션 업데이트
       await setDoc(
         doc(db, 'Gallery', docId),
         { images: updatedImages },
@@ -27,8 +27,7 @@ const ImageUpload = ({ character, editCharacter }) => {
     }
   };
 
-  const handleImageUpload = async (event) => {
-    const files = event.target.files;
+  const handleImageUpload = async (files) => {
     if (!files.length) return;
 
     setIsUploading(true);
@@ -70,11 +69,8 @@ const ImageUpload = ({ character, editCharacter }) => {
       };
 
       try {
-        // character_details 업데이트
         await setDoc(doc(db, 'character_details', docId), updatedCharacterData, { merge: true });
         console.log('Firestore successfully updated with new images');
-
-        // Gallery 컬렉션 동기화
         await syncGallery(updatedImages);
       } catch (error) {
         console.error('Error updating Firestore document:', error);
@@ -91,19 +87,15 @@ const ImageUpload = ({ character, editCharacter }) => {
     const storageRef = ref(storage, imageUrl);
 
     try {
-      // Storage에서 이미지 삭제
       await deleteObject(storageRef);
       const updatedImages = images.filter((_, i) => i !== index);
       setImages(updatedImages);
       setCurrentIndex((currentIndex - 1 + updatedImages.length) % updatedImages.length);
 
-      // character_details에서 이미지 URL 제거
       await updateDoc(doc(db, 'character_details', docId), {
         images: arrayRemove(imageUrl),
       });
       console.log('Image successfully deleted from character_details');
-
-      // Gallery 컬렉션 동기화
       await syncGallery(updatedImages);
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -119,19 +111,44 @@ const ImageUpload = ({ character, editCharacter }) => {
     setCurrentIndex((currentIndex - 1 + images.length) % images.length);
   };
 
+  // 드래그 앤 드롭 이벤트 핸들러
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = e.dataTransfer.files;
+    handleImageUpload(files);
+  };
+
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <div className="w-full flex justify-center">
+    <div className="absolute right-24 flex flex-col items-center space-y-4">
+      <div
+        className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 ${
+          isDragOver ? 'border-yellow-400 bg-yellow-100' : 'border-gray-300'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <p className="text-gray-500 mb-2">이미지를 드래그하여 업로드하세요</p>
         <label
           htmlFor="file-upload"
           className="cursor-pointer bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition"
         >
-          이미지 업로드
+          파일 선택
         </label>
         <input
           id="file-upload"
           type="file"
-          onChange={handleImageUpload}
+          onChange={(e) => handleImageUpload(e.target.files)}
           accept="image/*"
           multiple
           className="hidden"

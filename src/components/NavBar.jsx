@@ -69,6 +69,7 @@ const NavBar = () => {
           <div className={`menu ${isActive('/new')}`} onClick={() => navigateTo('/new')}>CHARACTERS</div>
           <div className={`menu ${isActive('/gallery')}`} onClick={() => navigateTo('/gallery')}>Gallery</div>
           <div className={`menu ${isActive('/family')}`} onClick={() => navigateTo('/family')}>Family&Skill</div>
+          <div className={`menu ${isActive('/audiolink')}`} onClick={() => navigateTo('/audiolink')}>AudioLink</div>
           <div className={`menu ${isActive('/character')}`} onClick={() => navigateTo('/character')}>OLD CHARACTER[폐기 예정]</div>
           <div ref={gameButtonRef} className={`menu`} onClick={toggleGameDropdown}>
             GAME
