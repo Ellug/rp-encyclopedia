@@ -87,13 +87,13 @@ const Gallery = () => {
             >
               {character.id}
             </h2>
-            <div className="images-row flex flex-wrap gap-4">
+            <div className="images-row flex flex-wrap sm:gap-4 gap-2">
               {character.images.map((image, index) => (
                 <img
                   key={index}
                   src={image}
                   alt={`${character.id}-${index}`}
-                  className="character-image w-[300px] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
+                  className="character-image sm:w-[300px] w-[30%] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
                   onClick={() => setSelectedImage(image)}
                 />
               ))}
