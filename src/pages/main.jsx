@@ -1,13 +1,12 @@
-import React from 'react'
-import '../styles/main.css'
+import React from 'react';
 
-const main = () => {
+const Main = () => {
   return (
-    <div className='main'>
-      <h1>Project RP</h1>
-      <h2>Welcome Spawner</h2>
+    <div className="main h-[80vh] w-full relative flex flex-col items-center justify-center">
+      <h1 className="text-center text-[120px] font-bold">Project RP</h1>
+      <h2 className="text-center text-[50px] mt-2">- Welcome Spawner -</h2>
     </div>
-  )
-}
+  );
+};
 
-export default main
+export default Main;

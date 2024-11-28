@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import database from '../firebaseConfig';
-import NewDetailModal from '../components/NewDetailModal.jsx'
+import NewDetailModal from '../components/NewDetailModal.jsx';
 
 const Gallery = () => {
-  const [characterImages, setCharacterImages] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -14,26 +14,24 @@ const Gallery = () => {
   const DetailModalMemo = React.memo(NewDetailModal);
 
   useEffect(() => {
-    const fetchCharacterImages = async () => {
+    const fetchGalleryImages = async () => {
       setIsLoading(true);
       try {
-        const querySnapshot = await getDocs(collection(db, 'character_details'));
-        const data = querySnapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            images: doc.data().images || [],
-          }))
-          .filter(item => item.images.length > 0);
+        const querySnapshot = await getDocs(collection(db, 'Gallery'));
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id, // Gallery 컬렉션의 문서 ID (character_details의 docId와 동일)
+          images: doc.data().images || [],
+        }));
 
-        setCharacterImages(data);
+        setGalleryImages(data);
       } catch (error) {
-        console.error('Error fetching character details: ', error);
+        console.error('Error fetching gallery data: ', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCharacterImages();
+    fetchGalleryImages();
   }, [db]);
 
   const handleCharacterClick = async (characterId) => {
@@ -74,7 +72,7 @@ const Gallery = () => {
       </div>
 
       {/* 갤러리 */}
-      {characterImages
+      {galleryImages
         .filter(character =>
           character.id.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -120,7 +118,7 @@ const Gallery = () => {
               className="w-[50px] h-[50px] flex items-center justify-center absolute top-4 right-4 text-white bg-gray-800 rounded-full hover:bg-gray-700 hover:text-red-500"
               onClick={closeModal}
             >
-              <p className='mb-2 text-[36px]'>
+              <p className="mb-2 text-[36px]">
                 &times;
               </p>
             </button>
