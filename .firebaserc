@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "rp-encyclopedia"
-  }
+    "default": "rp-encyclopedia",
+    "prod": "rp-encyclopedia"
+  },
+  "targets": {},
+  "etags": {}
 }

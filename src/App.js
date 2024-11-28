@@ -13,6 +13,7 @@ import Family from './pages/Family';
 import New from './pages/New'
 import Auth from './Auth';
 import MoogoonghwaGame from './pages/MoogoonghwaGame';
+import Gallery from './pages/Gallery';
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={requireAuth(<Main />)} />
             <Route path="/history" element={requireAuth(<History />)} />
             <Route path="/character" element={requireAuth(<Character />)} />
+            <Route path="/gallery" element={requireAuth(<Gallery />)} />
             <Route path="/family" element={requireAuth(<Family />)} />
             <Route path="/new" element={<New />} />
             <Route path="/etc" element={<Etc />} />

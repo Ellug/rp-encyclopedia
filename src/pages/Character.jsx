@@ -1,6 +1,4 @@
-// src/pages/Character.jsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-// import app from '../firebaseConfig';
 import database from '../firebaseConfig';
 import { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import '../styles/Character.css';

@@ -5,10 +5,7 @@ const main = () => {
   return (
     <div className='main'>
       <h1>Project RP</h1>
-      <h1>Project RP</h1>
-      <h1>Project RP</h1>
-      <h1>Project RP</h1>
-      <h1>Project RP</h1>
+      <h2>Welcome Spawner</h2>
     </div>
   )
 }

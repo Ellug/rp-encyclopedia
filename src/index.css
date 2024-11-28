@@ -1,13 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 공통 body 스타일 */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* code 스타일 */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* 버튼 기본 스타일 */
+button {
+  @apply px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  @apply bg-gray-700 border-gray-500;
+}
+
+button:disabled {
+  @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+}
+
+/* 인풋 필드 기본 스타일 */
+input {
+  @apply w-full px-3 py-2 text-gray-800 border border-gray-300 rounded-md;
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  @apply outline-none ring-2 ring-yellow-400;
+}
+
+input::placeholder {
+  @apply text-gray-500;
+}
+
+/* 셀렉트 박스 기본 스타일 */
+select {
+  @apply px-3 py-2 text-gray-800 border border-gray-300 rounded-md;
+  transition: all 0.2s ease-in-out;
+}
+
+select:focus {
+  @apply outline-none ring-2 ring-yellow-400;
+}
+
+/* 테이블 스타일 */
+table {
+  @apply w-full border-collapse text-left text-sm text-gray-300;
+}
+
+thead th {
+  @apply sticky top-0 bg-gray-800 text-gray-100 px-4 py-2;
+}
+
+tbody tr {
+  @apply border-b border-gray-700;
+}
+
+tbody tr:hover {
+  @apply bg-gray-700 text-yellow-300 cursor-pointer;
+}
+
+td {
+  @apply px-4 py-2 border-r border-gray-500;
+}
+
+td:last-child {
+  @apply border-0;
+}
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical; /* 세로 크기만 조정 가능 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #facc15; /* Tailwind의 yellow-400 */
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.4); /* 노란 포커스 효과 */
+}
+
+textarea::placeholder {
+  color: #aaa;
+  font-style: italic;
 }

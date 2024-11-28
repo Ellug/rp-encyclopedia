@@ -20,7 +20,11 @@ const Character = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchCategory, setSearchCategory] = useState('name');
+  const [showAddFields, setShowAddFields] = useState(false);
   
+  const toggleAddFields = () => {
+    setShowAddFields(prev => !prev);
+  };
 
   // 캐릭터 데이터 불러오기
   const fetchData = async () => {
@@ -229,8 +233,7 @@ const Character = () => {
         <div>
           현재 연도 설정: <input type="number" value={currentYear} onChange={handleYearChange} placeholder="현재 연도" />
         </div>
-        <div style={{ display: 'flex'}}>
-          검색:
+        <div style={{ display: 'flex' }}>
           <select onChange={handleCategoryChange} value={searchCategory}>
             <option value="name">이름</option>
             <option value="family">가문</option>
@@ -246,18 +249,23 @@ const Character = () => {
       </div>
 
        {/* 추가 입력 필드 */}
-       <div className='add-inputs'>
-        <input type="number" name="birth" value={newCharacter.birth} onChange={handleNewCharacterChange } placeholder="Birth" autoComplete='off'/>
-        <input type="text" name="name" value={newCharacter.name} onChange={handleNewCharacterChange } placeholder="Name" autoComplete='off' />
-        <input type="text" name="family" value={newCharacter.family} onChange={handleNewCharacterChange } placeholder="Family" autoComplete='off' />
-        <input type="text" name="title" value={newCharacter.title} onChange={handleNewCharacterChange } placeholder="title" autoComplete='off' />
-        <input type="text" name="gender" value={newCharacter.gender} onChange={handleNewCharacterChange } placeholder="Gender" autoComplete='off' />
-        <input type="text" name="unit" value={newCharacter.unit} onChange={handleNewCharacterChange } placeholder="Unit" autoComplete='off' />
-        <input type="text" name="party" value={newCharacter.party} onChange={handleNewCharacterChange } placeholder="Party" autoComplete='off' />
-        <input type="text" name="skill" value={newCharacter.skill} onChange={handleNewCharacterChange } placeholder="skill" autoComplete='off' />
-        <input type="text" name="body" value={newCharacter.body} onChange={handleNewCharacterChange } placeholder="body" autoComplete='off' />
-      </div>
-      <button className='comBTN' onClick={addCharacter} disabled={!newCharacter.name}>추가</button>
+       <button onClick={toggleAddFields} style={{ margin: '20px' }}>
+        {showAddFields ? '추가 입력 필드 닫기' : '추가 입력 필드 열기'}
+      </button>
+       {showAddFields && (
+        <div className='add-inputs'>
+          <input type="number" name="birth" value={newCharacter.birth} onChange={handleNewCharacterChange} placeholder="Birth" autoComplete='off' />
+          <input type="text" name="name" value={newCharacter.name} onChange={handleNewCharacterChange} placeholder="Name" autoComplete='off' />
+          <input type="text" name="family" value={newCharacter.family} onChange={handleNewCharacterChange} placeholder="Family" autoComplete='off' />
+          <input type="text" name="title" value={newCharacter.title} onChange={handleNewCharacterChange} placeholder="title" autoComplete='off' />
+          <input type="text" name="gender" value={newCharacter.gender} onChange={handleNewCharacterChange} placeholder="Gender" autoComplete='off' />
+          <input type="text" name="unit" value={newCharacter.unit} onChange={handleNewCharacterChange} placeholder="Unit" autoComplete='off' />
+          <input type="text" name="party" value={newCharacter.party} onChange={handleNewCharacterChange} placeholder="Party" autoComplete='off' />
+          <input type="text" name="skill" value={newCharacter.skill} onChange={handleNewCharacterChange} placeholder="skill" autoComplete='off' />
+          <input type="text" name="body" value={newCharacter.body} onChange={handleNewCharacterChange} placeholder="body" autoComplete='off' />
+        </div>
+      )}
+      {showAddFields && <button className='comBTN' onClick={addCharacter} disabled={!newCharacter.name}>추가</button>}
 
       {showModal ? (
         <DetailModalMemo
