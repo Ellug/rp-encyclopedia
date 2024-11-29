@@ -129,7 +129,7 @@ const ImageUpload = ({ character, editCharacter }) => {
   };
 
   return (
-    <div className="absolute right-24 flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-4">
       <div
         className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 ${
           isDragOver ? 'border-yellow-400 bg-yellow-100' : 'border-gray-300'

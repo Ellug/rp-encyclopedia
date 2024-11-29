@@ -93,7 +93,7 @@ const Gallery = () => {
                   key={index}
                   src={image}
                   alt={`${character.id}-${index}`}
-                  className="character-image sm:w-[300px] w-[30%] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
+                  className="character-image sm:w-[300px] w-[27vw] sm:max-h-[400px] max-h-[36vw] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
                   onClick={() => setSelectedImage(image)}
                 />
               ))}
@@ -115,7 +115,7 @@ const Gallery = () => {
               onClick={(e) => e.stopPropagation()}
             />
             <button
-              className="w-[50px] h-[50px] flex items-center justify-center absolute top-4 right-4 text-white bg-gray-800 rounded-full hover:bg-gray-700 hover:text-red-500"
+              className="w-[50px] h-[50px] flex items-center justify-center absolute top-2 right-2 text-white bg-transparent border-none rounded-full hover:text-red-500 hover:bg-transparent"
               onClick={closeModal}
             >
               <p className="mb-2 text-[36px]">
