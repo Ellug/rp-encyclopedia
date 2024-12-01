@@ -1,10 +1,9 @@
 import React from 'react';
-import '../styles/Spinner.css'; // 스타일링을 위한 CSS 파일을 가정합니다
 
 const Spinner = () => {
   return (
-    <div className="spinner-container">
-      <div className="spinner"></div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
     </div>
   );
 };

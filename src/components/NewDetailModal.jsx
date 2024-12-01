@@ -4,9 +4,11 @@ import { getFirestore } from 'firebase/firestore';
 import '../styles/NewDetailModal.css';
 import ImageUpload from './ImageUpload';
 import { deleteObject, getStorage, listAll, ref } from 'firebase/storage';
+import Spinner from './Spinner';
 
 const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const db = getFirestore();
   const storage = getStorage();
   const originalDocId = `${character.name} ${character.family}`;
@@ -58,6 +60,7 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
       images: images
     };
 
+    setIsLoading(true)
     try {
       await setDoc(newCharRef, characterData);
       await setDoc(newDetailRef, detailData);
@@ -78,6 +81,8 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
       onClose();
     } catch (error) {
       console.error("Error saving document: ", error);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -88,24 +93,37 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
 
   const deleteStorageFolder = async (path) => {
     const folderRef = ref(storage, path);
+    setIsLoading(true)
     try {
       const listResult = await listAll(folderRef);
-      listResult.items.forEach(async (itemRef) => {
-        await deleteObject(itemRef);
-      });
-      console.log('All files in the folder have been deleted');
+  
+      // 파일 삭제
+      const deleteFiles = listResult.items.map((itemRef) => deleteObject(itemRef));
+  
+      // 하위 폴더 삭제 (재귀 호출)
+      const deleteFolders = listResult.prefixes.map((folder) => deleteStorageFolder(folder.fullPath));
+  
+      // 모든 삭제 작업 완료 대기
+      await Promise.all([...deleteFiles, ...deleteFolders]);
+  
+      console.log(`All files and folders in ${path} have been deleted.`);
     } catch (error) {
-      console.error("Failed to delete storage folder:", error);
+      console.error(`Failed to delete storage folder at ${path}:`, error);
+    } finally {
+      setIsLoading(false)
     }
   };
+  
   
   const confirmDeletion = async () => {
     const docId = character.family ? `${character.name} ${character.family}` : character.name;
     if(window.confirm("정말로 삭제하시겠습니까?")) {
+      setIsLoading(true)
       try {
         // Firestore에서 문서 삭제
         await deleteDoc(doc(db, "characters", docId));
         await deleteDoc(doc(db, "character_details", docId));
+        await deleteDoc(doc(db, "Gallery", docId));
   
         // Storage에서 이미지 폴더 삭제
         await deleteStorageFolder(`charactersIMG/${docId}`);
@@ -114,6 +132,8 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
       } catch (error) {
         console.error("Error deleting document or folder: ", error);
         alert('삭제 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false)
       }
     }
   };
@@ -147,7 +167,6 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
       openModal(characterId); // 클릭된 ID로 모달 열기
     }, 100);
   };
-  
 
 
   // 모달 배경 클릭 핸들러
@@ -166,6 +185,7 @@ const DetailModal = ({ character, onClose, nowYear, openModal, onUpdate }) => {
 
   return (
     <div className="modal-background" onClick={handleModalBackgroundClick}>
+      {isLoading && <Spinner />}
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <span className="close" onClick={onClose}>&times;</span>
 

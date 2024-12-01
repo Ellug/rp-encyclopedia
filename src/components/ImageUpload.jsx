@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { arrayRemove, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import Spinner from './Spinner.jsx'
 
 const ImageUpload = ({ character, editCharacter }) => {
   const [images, setImages] = useState(character.images || []);
@@ -155,7 +156,7 @@ const ImageUpload = ({ character, editCharacter }) => {
         />
       </div>
 
-      {isUploading && <p className="text-gray-500">이미지 업로드 중...</p>}
+      {isUploading && <Spinner />}
 
       {images.length > 0 && (
         <div className="relative w-full max-w-md">

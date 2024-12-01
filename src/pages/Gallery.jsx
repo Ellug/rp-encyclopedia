@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import database from '../firebaseConfig';
 import NewDetailModal from '../components/NewDetailModal.jsx';
+import Spinner from '../components/Spinner.jsx';
 
 const Gallery = () => {
   const [galleryImages, setGalleryImages] = useState([]);
@@ -54,14 +55,12 @@ const Gallery = () => {
     setCurrentCharacter(null);
   };
 
-  if (isLoading) {
-    return <p className="text-center text-gray-500 mt-6">Loading...</p>;
-  }
-
   return (
-    <div className="gallery-container p-4 sm:px-20">
+    <div className="gallery-container p-2 sm:px-20">
+
+      {isLoading && <Spinner />}
       {/* 검색 입력 */}
-      <div className="search-container mb-6 w-[400px]">
+      <div className="search-container mb-6 w-[300px] sm:w-[400px]">
         <input
           type="text"
           value={searchTerm}
@@ -87,13 +86,13 @@ const Gallery = () => {
             >
               {character.id}
             </h2>
-            <div className="images-row flex flex-wrap sm:gap-4 gap-2">
+            <div className="images-row flex flex-wrap sm:gap-4 gap-1">
               {character.images.map((image, index) => (
                 <img
                   key={index}
                   src={image}
                   alt={`${character.id}-${index}`}
-                  className="character-image sm:w-[300px] w-[27vw] sm:max-h-[400px] max-h-[36vw] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
+                  className="character-image sm:w-[300px] w-[30vw] sm:max-h-[400px] max-h-[40vw] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
                   onClick={() => setSelectedImage(image)}
                 />
               ))}
